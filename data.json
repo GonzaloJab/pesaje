@@ -5,7 +5,35 @@
       "id": "vader",
       "name": "Vader",
       "color": "#6c8cff"
+    },
+    {
+      "id": "rafa",
+      "name": "Rafa",
+      "color": "#29ff29"
+    },
+    {
+      "id": "villa",
+      "name": "Villa",
+      "color": "#c47bff"
+    },
+    {
+      "id": "mingo",
+      "name": "Mingo",
+      "color": "#ecff08"
+    },
+    {
+      "id": "hugo",
+      "name": "Hugo",
+      "color": "#e50000"
     }
   ],
-  "entries": {}
+  "entries": {
+    "2026-08-25": {
+      "vader": 98.8,
+      "rafa": 78.9,
+      "villa": 77.1,
+      "mingo": 71.8,
+      "hugo": 91.6
+    }
+  }
 }
