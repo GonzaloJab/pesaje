@@ -1,0 +1,9 @@
+{
+  "unit": "kg",
+  "people": [
+    { "id": "vader", "name": "Vader", "color": "#6c8cff" }
+  ],
+  "entries": {
+    "2026-08-25": { "vader": 85.0 }
+  }
+}

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Pesaje Diario · admin</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel-2:#1e222b;--line:#2a2f3a;--text:#e8eaf0;
+        --muted:#8b93a7;--accent:#6c8cff;--ok:#38d39f;--err:#ff5d5d;--radius:12px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);padding:24px 16px 80px;
+       font:15px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:620px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+          padding:16px;margin-bottom:16px}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px;font-weight:600}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+  input{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+        border-radius:9px;padding:10px 12px;font:inherit}
+  input:focus{outline:none;border-color:var(--accent)}
+  .row{display:flex;gap:10px;align-items:end}
+  .row > div{flex:1}
+  button{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:11px 16px;
+         font:inherit;font-weight:600;cursor:pointer}
+  button.ghost{background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-weight:500}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .people{display:flex;flex-direction:column;gap:10px}
+  .person{display:flex;align-items:center;gap:10px}
+  .person .nm{flex:1;display:flex;align-items:center;gap:8px}
+  .person input{width:110px;text-align:right}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .last{color:var(--muted);font-size:12px;width:84px;text-align:right}
+  .msg{margin-top:12px;font-size:13px;min-height:20px}
+  .msg.ok{color:var(--ok)} .msg.err{color:var(--err)} .msg.info{color:var(--muted)}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pesaje Diario · admin</h1>
+  <div class="sub">Página privada. No se guarda nada sin tu token de GitHub.</div>
+
+  <section id="cfg">
+    <h2>Conexión</h2>
+    <div class="row">
+      <div><label>Usuario u organización de GitHub</label><input id="owner" placeholder="tu-usuario"></div>
+      <div><label>Repositorio</label><input id="repo" placeholder="pesaje"></div>
+    </div>
+    <label>Rama</label><input id="branch" value="main">
+    <label>Token de acceso personal (se guarda solo en este navegador)</label>
+    <input id="token" type="password" placeholder="github_pat_...">
+    <div class="row" style="margin-top:14px">
+      <button id="connect">Conectar y cargar</button>
+      <button class="ghost" id="forget" style="flex:none">Olvidar token</button>
+    </div>
+    <div class="msg info" id="cfgmsg"></div>
+  </section>
+
+  <section id="entry" hidden>
+    <h2>Registro del día</h2>
+    <label>Fecha</label><input id="date" type="date">
+    <div class="people" id="people" style="margin-top:16px"></div>
+    <div class="hint">Deja un campo vacío para saltarte a esa persona en esa fecha.</div>
+    <div style="margin-top:16px"><button id="save">Guardar en GitHub</button></div>
+    <div class="msg" id="savemsg"></div>
+  </section>
+
+  <section id="addp" hidden>
+    <h2>Añadir persona</h2>
+    <div class="row">
+      <div><label>Nombre</label><input id="newname" placeholder="Sofía"></div>
+      <div style="flex:none"><label>Color</label><input id="newcolor" type="color" value="#ff6fae" style="width:56px;padding:4px"></div>
+    </div>
+    <div style="margin-top:14px"><button class="ghost" id="addbtn">Añadir persona</button></div>
+    <div class="hint">Se incorpora desde la primera fecha en la que le registres un peso; los días anteriores quedan en blanco.</div>
+    <div class="msg" id="addmsg"></div>
+  </section>
+
+  <div class="sub" style="text-align:center">
+    <a href="index.html">← ver el gráfico público</a>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const API = "https://api.github.com";
+let DATA = null, SHA = null;
+
+/* ---------- configuración guardada (localStorage, solo este navegador) ---------- */
+const CFG_KEYS = ["owner","repo","branch","token"];
+CFG_KEYS.forEach(k => { const v = localStorage.getItem("pd_"+k); if(v) $(k).value = v; });
+function saveCfg(){ CFG_KEYS.forEach(k => localStorage.setItem("pd_"+k, $(k).value.trim())); }
+$("forget").onclick = () => { CFG_KEYS.forEach(k => localStorage.removeItem("pd_"+k)); $("token").value=""; msg("cfgmsg","info","Borrado."); };
+
+function msg(id,cls,text){ const e=$(id); e.className="msg "+cls; e.textContent=text; }
+const cfg = () => ({ owner:$("owner").value.trim(), repo:$("repo").value.trim(),
+                     branch:$("branch").value.trim()||"main", token:$("token").value.trim() });
+
+/* base64 <-> utf8 */
+const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,"")), c=>c.charCodeAt(0)));
+
+async function gh(path, opts={}){
+  const c = cfg();
+  const res = await fetch(API+path, {...opts, headers:{
+    "Authorization":"Bearer "+c.token,
+    "Accept":"application/vnd.github+json",
+    "X-GitHub-Api-Version":"2022-11-28",
+    ...(opts.headers||{})
+  }});
+  if(!res.ok) throw new Error(res.status+" "+(await res.text()).slice(0,180));
+  return res.json();
+}
+
+/* ---------- cargar ---------- */
+$("connect").onclick = async () => {
+  const c = cfg();
+  if(!c.owner || !c.repo || !c.token){ return msg("cfgmsg","err","Rellena usuario, repositorio y token."); }
+  saveCfg();
+  msg("cfgmsg","info","Cargando data.json…");
+  try{
+    const j = await gh(`/repos/${c.owner}/${c.repo}/contents/data.json?ref=${encodeURIComponent(c.branch)}`);
+    SHA = j.sha;
+    DATA = JSON.parse(unb64(j.content));
+    DATA.people = DATA.people || [];
+    DATA.entries = DATA.entries || {};
+    DATA.unit = DATA.unit || "kg";
+    msg("cfgmsg","ok",`Conectado · ${DATA.people.length} personas · ${Object.keys(DATA.entries).length} días`);
+    $("entry").hidden = false; $("addp").hidden = false;
+    $("date").value = new Date().toISOString().slice(0,10);
+    renderPeople();
+  }catch(e){ msg("cfgmsg","err","Error: "+e.message); }
+};
+
+/* ---------- formulario del día ---------- */
+function lastOf(pid){
+  const ds = Object.keys(DATA.entries).sort().reverse();
+  for(const d of ds) if(typeof DATA.entries[d][pid] === "number") return DATA.entries[d][pid];
+  return null;
+}
+function renderPeople(){
+  const day = DATA.entries[$("date").value] || {};
+  $("people").innerHTML = DATA.people.map(p=>{
+    const cur = typeof day[p.id]==="number" ? day[p.id] : "";
+    const prev = lastOf(p.id);
+    return `<div class="person">
+      <div class="nm"><span class="dot" style="background:${p.color}"></span>${p.name}</div>
+      <span class="last">${prev===null?"—":"último "+prev}</span>
+      <input type="number" step="0.1" min="0" inputmode="decimal" data-id="${p.id}" value="${cur}" placeholder="${DATA.unit}">
+    </div>`;
+  }).join("") || '<div class="hint">Aún no hay personas — añade una abajo.</div>';
+}
+$("date").onchange = renderPeople;
+
+/* ---------- añadir persona ---------- */
+$("addbtn").onclick = () => {
+  const name = $("newname").value.trim();
+  if(!name) return msg("addmsg","err","El nombre es obligatorio.");
+  let id = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+              .replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || ("p"+Date.now());
+  while(DATA.people.some(p=>p.id===id)) id += "1";
+  DATA.people.push({ id, name, color:$("newcolor").value });
+  $("newname").value = "";
+  renderPeople();
+  msg("addmsg","info", `«${name}» añadida en local — pulsa Guardar para publicarla.`);
+};
+
+/* ---------- guardar ---------- */
+$("save").onclick = async () => {
+  const date = $("date").value;
+  if(!date) return msg("savemsg","err","Elige una fecha.");
+  const day = { ...(DATA.entries[date] || {}) };
+  let n = 0;
+  $("people").querySelectorAll("input[data-id]").forEach(inp=>{
+    const v = inp.value.trim();
+    if(v === "") { delete day[inp.dataset.id]; return; }
+    const num = parseFloat(v);
+    if(!isNaN(num)){ day[inp.dataset.id] = Math.round(num*10)/10; n++; }
+  });
+  if(Object.keys(day).length) DATA.entries[date] = day; else delete DATA.entries[date];
+
+  // mantener las fechas ordenadas en el archivo
+  const sorted = {};
+  Object.keys(DATA.entries).sort().forEach(d => sorted[d] = DATA.entries[d]);
+  DATA.entries = sorted;
+
+  const c = cfg();
+  $("save").disabled = true;
+  msg("savemsg","info","Guardando…");
+  try{
+    const res = await gh(`/repos/${c.owner}/${c.repo}/contents/data.json`, {
+      method:"PUT",
+      body: JSON.stringify({
+        message: `pesos ${date} (${n} registros)`,
+        content: b64(JSON.stringify(DATA, null, 2) + "\n"),
+        sha: SHA,
+        branch: c.branch
+      })
+    });
+    SHA = res.content.sha;
+    msg("savemsg","ok",`Guardados ${n} pesos del ${date}. Visible en ~1 minuto.`);
+    renderPeople();
+  }catch(e){
+    msg("savemsg","err","Error al guardar: "+e.message+" — recarga la página e inténtalo de nuevo.");
+  }finally{ $("save").disabled = false; }
+};
+</script>
+</body>
+</html>

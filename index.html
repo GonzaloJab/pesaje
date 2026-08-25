@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pesaje Diario</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel-2:#1e222b; --line:#2a2f3a;
+    --text:#e8eaf0; --muted:#8b93a7; --up:#ff5d5d; --down:#38d39f; --accent:#6c8cff;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font:15px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:24px 16px 64px;
+  }
+  .wrap{max-width:960px;margin:0 auto}
+  header.top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  h1{font-size:22px;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:13px}
+
+  /* ---- cabecera de subidas y bajadas ---- */
+  .movers{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:20px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .card .label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+  .card .who{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px}
+  .card .val{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+  .card .note{font-size:12px;color:var(--muted);margin-top:2px}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
+
+  /* ---- gráfico ---- */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .chartbox{position:relative}
+  svg{width:100%;height:auto;display:block;overflow:visible}
+  .grid{stroke:var(--line);stroke-width:1}
+  .axis{fill:var(--muted);font-size:11px}
+  .series{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+  .pt{stroke:var(--panel);stroke-width:2;cursor:pointer}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .chip{display:flex;align-items:center;gap:7px;background:var(--panel-2);border:1px solid var(--line);
+        border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;user-select:none}
+  .chip.off{opacity:.35}
+  .chip .num{color:var(--muted);font-variant-numeric:tabular-nums}
+
+  /* ---- tabla ---- */
+  table{width:100%;border-collapse:collapse;margin-top:22px;font-variant-numeric:tabular-nums}
+  th,td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);font-size:14px}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  tbody tr:last-child td{border-bottom:none}
+  .name{display:flex;align-items:center;gap:8px}
+
+  footer{color:var(--muted);font-size:12px;margin-top:28px;text-align:center}
+  .tip{position:absolute;pointer-events:none;background:#000d;border:1px solid var(--line);
+       border-radius:8px;padding:6px 9px;font-size:12px;white-space:nowrap;opacity:0;transition:opacity .12s}
+  @media (max-width:520px){ .card .val{font-size:20px} h1{font-size:19px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Pesaje Diario</h1>
+    <span class="sub" id="subtitle">cargando…</span>
+  </header>
+
+  <section class="movers" id="movers"></section>
+
+  <section class="panel">
+    <div class="chartbox">
+      <svg id="chart" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Peso a lo largo del tiempo"></svg>
+      <div class="tip" id="tip"></div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <table>
+    <thead>
+      <tr><th>Persona</th><th>Último</th><th>Último cambio</th><th>Desde el inicio</th><th>Registros</th></tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <footer>Actualizado a diario · <span id="lastdate"></span></footer>
+</div>
+
+<script>
+/* ------------------------------------------------------------------
+   DATOS DE EJEMPLO — solo se usan si no se puede cargar data.json
+   (por ejemplo al abrir este archivo directamente desde el disco).
+   En la web publicada manda siempre data.json.
+------------------------------------------------------------------ */
+const DEMO = {
+  unit: "kg",
+  people: [
+    { id:"vader",  name:"Vader",  color:"#6c8cff" },
+    { id:"marta",  name:"Marta",  color:"#38d39f" },
+    { id:"leo",    name:"Leo",    color:"#ffb454" },
+    { id:"sofia",  name:"Sofía",  color:"#ff6fae" }
+  ],
+  entries: {
+    "2026-08-11": { vader:88.4, marta:64.2, leo:95.0 },
+    "2026-08-12": { vader:88.1, marta:64.4, leo:94.6 },
+    "2026-08-13": { vader:88.6, marta:64.0, leo:94.1 },
+    "2026-08-14": { vader:87.9, marta:63.8, leo:94.4 },
+    "2026-08-15": { vader:87.5, marta:63.9, leo:93.7 },
+    "2026-08-16": { vader:87.7, marta:63.5, leo:93.2 },
+    "2026-08-17": { vader:87.2, marta:63.6, leo:93.5 },
+    "2026-08-18": { vader:86.8, marta:63.3, leo:93.0, sofia:71.4 },
+    "2026-08-19": { vader:87.0, marta:63.1, leo:92.4, sofia:71.1 },
+    "2026-08-20": { vader:86.4, marta:63.4, leo:92.7, sofia:70.6 },
+    "2026-08-21": { vader:86.1, marta:63.0, leo:92.1, sofia:70.9 },
+    "2026-08-22": { vader:85.7, marta:62.8, leo:92.5, sofia:70.3 },
+    "2026-08-23": { vader:85.9, marta:62.9, leo:91.8, sofia:69.8 },
+    "2026-08-24": { vader:85.3, marta:62.6, leo:91.9, sofia:69.9 },
+    "2026-08-25": { vader:84.9, marta:62.7, leo:91.2, sofia:69.4 }
+  }
+};
+
+const PAD = { l:52, r:18, t:18, b:34 };
+const W = 900, H = 420;
+let DATA = null;
+const hidden = new Set();
+
+/* ---------- utilidades ---------- */
+const fmt = n => (Math.round(n*10)/10).toFixed(1);
+const signed = n => (n>0?"+":"") + fmt(n);
+const dLabel = iso => { const [y,m,d] = iso.split("-"); return d + "/" + m; };
+
+/** Pares [fecha, valor] ordenados de una persona, saltando los días sin dato. */
+function seriesOf(pid){
+  return Object.keys(DATA.entries).sort()
+    .filter(d => typeof DATA.entries[d][pid] === "number")
+    .map(d => [d, DATA.entries[d][pid]]);
+}
+
+/* ---------- carga ---------- */
+async function load(){
+  try{
+    const res = await fetch("data.json?t=" + Date.now(), {cache:"no-store"});
+    if(!res.ok) throw 0;
+    DATA = await res.json();
+  }catch(e){
+    DATA = DEMO;
+  }
+  if(!DATA.entries || !Object.keys(DATA.entries).length){
+    document.getElementById("subtitle").textContent = "aún no hay registros";
+    return;
+  }
+  render();
+}
+
+/* ---------- pintado ---------- */
+function render(){
+  const dates = Object.keys(DATA.entries).sort();
+  const last = dates[dates.length-1];
+  document.getElementById("subtitle").textContent =
+    DATA.people.length + (DATA.people.length===1?" persona":" personas") + " · " +
+    dates.length + (dates.length===1?" día":" días") + " · " + DATA.unit;
+  document.getElementById("lastdate").textContent = "último registro " + last;
+
+  const stats = DATA.people.map(p => {
+    const s = seriesOf(p.id);
+    if(!s.length) return { p, n:0 };
+    const latest = s[s.length-1][1];
+    const prev   = s.length>1 ? s[s.length-2][1] : null;
+    return {
+      p, n:s.length, latest,
+      latestDate: s[s.length-1][0],
+      delta: prev===null ? null : latest - prev,
+      total: latest - s[0][1],
+      start: s[0][1]
+    };
+  }).filter(x => x.n>0);
+
+  drawMovers(stats);
+  drawChart();
+  drawLegend(stats);
+  drawTable(stats);
+}
+
+function moverCard(label, st, key, note){
+  if(!st) return `<div class="card"><div class="label">${label}</div>
+    <div class="who flat">—</div><div class="note">aún no hay datos suficientes</div></div>`;
+  const v = st[key];
+  const cls = v > 0.001 ? "up" : v < -0.001 ? "down" : "flat";
+  const arrow = v > 0.001 ? "▲" : v < -0.001 ? "▼" : "•";
+  return `<div class="card">
+    <div class="label">${label}</div>
+    <div class="who"><span class="dot" style="background:${st.p.color}"></span>${st.p.name}</div>
+    <div class="val ${cls}">${arrow} ${signed(v)} ${DATA.unit}</div>
+    <div class="note">${note(st)}</div>
+  </div>`;
+}
+
+function drawMovers(stats){
+  const withDelta = stats.filter(s => s.delta !== null);
+  const byDelta = [...withDelta].sort((a,b)=>a.delta-b.delta);
+  const byTotal = [...stats].sort((a,b)=>a.total-b.total);
+
+  const bestDay  = byDelta[0];
+  const worstDay = byDelta[byDelta.length-1];
+  const bestAll  = byTotal[0];
+  const worstAll = byTotal[byTotal.length-1];
+
+  const noteDay = s => "desde el pesaje anterior · ahora " + fmt(s.latest) + " " + DATA.unit;
+  const noteAll = s => "de " + fmt(s.start) + " → " + fmt(s.latest) + " " + DATA.unit;
+
+  const dayGain = (worstDay && worstDay !== bestDay) ? worstDay : null;
+  const allGain = (worstAll && worstAll !== bestAll) ? worstAll : null;
+
+  document.getElementById("movers").innerHTML =
+      moverCard("Mayor bajada · último", bestDay, "delta", noteDay)
+    + moverCard(dayGain && dayGain.delta > 0 ? "Mayor subida · último" : "Menor bajada · último",
+                dayGain, "delta", noteDay)
+    + moverCard("Mejor en total", bestAll, "total", noteAll)
+    + moverCard(allGain && allGain.total > 0 ? "Más ha subido en total" : "Menos ha bajado en total",
+                allGain, "total", noteAll);
+}
+
+function drawChart(){
+  const svg = document.getElementById("chart");
+  const dates = Object.keys(DATA.entries).sort();
+  const visible = DATA.people.filter(p => !hidden.has(p.id));
+
+  let vals = [];
+  visible.forEach(p => seriesOf(p.id).forEach(([,v]) => vals.push(v)));
+  if(!vals.length){ svg.innerHTML = ""; return; }
+
+  const t0 = new Date(dates[0]).getTime();
+  const t1 = new Date(dates[dates.length-1]).getTime();
+  let min = Math.min(...vals), max = Math.max(...vals);
+  const pad = Math.max((max-min)*0.12, 0.6);
+  min -= pad; max += pad;
+
+  const X = iso => t1===t0 ? (PAD.l+(W-PAD.l-PAD.r)/2)
+      : PAD.l + (new Date(iso).getTime()-t0)/(t1-t0) * (W-PAD.l-PAD.r);
+  const Y = v => PAD.t + (max-v)/(max-min) * (H-PAD.t-PAD.b);
+
+  let out = "";
+
+  // rejilla y etiquetas del eje Y
+  const TICKS = 5;
+  for(let i=0;i<=TICKS;i++){
+    const v = min + (max-min)*i/TICKS, y = Y(v);
+    out += `<line class="grid" x1="${PAD.l}" y1="${y}" x2="${W-PAD.r}" y2="${y}"/>`;
+    out += `<text class="axis" x="${PAD.l-10}" y="${y+4}" text-anchor="end">${fmt(v)}</text>`;
+  }
+  // etiquetas del eje X (máx. ~7)
+  const step = Math.max(1, Math.ceil(dates.length/7));
+  dates.forEach((d,i)=>{
+    if(i % step && i !== dates.length-1) return;
+    out += `<text class="axis" x="${X(d)}" y="${H-PAD.b+20}" text-anchor="middle">${dLabel(d)}</text>`;
+  });
+
+  // series
+  visible.forEach(p=>{
+    const s = seriesOf(p.id);
+    if(!s.length) return;
+    const dAttr = s.map(([d,v],i)=> (i?"L":"M") + X(d).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
+    out += `<path class="series" d="${dAttr}" stroke="${p.color}"/>`;
+    s.forEach(([d,v])=>{
+      out += `<circle class="pt" cx="${X(d).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${s.length>40?2.5:4}"
+        fill="${p.color}" data-tip="${p.name} · ${dLabel(d)} · ${fmt(v)} ${DATA.unit}"/>`;
+    });
+  });
+
+  svg.innerHTML = out;
+  wireTooltip(svg);
+}
+
+function wireTooltip(svg){
+  const tip = document.getElementById("tip");
+  svg.querySelectorAll(".pt").forEach(c=>{
+    c.addEventListener("mouseenter", e=>{
+      const box = svg.getBoundingClientRect();
+      const r = c.getBoundingClientRect();
+      tip.textContent = c.dataset.tip;
+      tip.style.opacity = 1;
+      tip.style.left = (r.left - box.left + r.width/2 - tip.offsetWidth/2) + "px";
+      tip.style.top  = (r.top  - box.top  - tip.offsetHeight - 8) + "px";
+    });
+    c.addEventListener("mouseleave", ()=> tip.style.opacity = 0);
+  });
+}
+
+function drawLegend(stats){
+  const el = document.getElementById("legend");
+  el.innerHTML = DATA.people.map(p=>{
+    const st = stats.find(s=>s.p.id===p.id);
+    return `<div class="chip ${hidden.has(p.id)?"off":""}" data-id="${p.id}">
+      <span class="dot" style="background:${p.color}"></span>${p.name}
+      <span class="num">${st?fmt(st.latest):"—"}</span></div>`;
+  }).join("");
+  el.querySelectorAll(".chip").forEach(chip=>{
+    chip.onclick = ()=>{
+      const id = chip.dataset.id;
+      hidden.has(id) ? hidden.delete(id) : hidden.add(id);
+      render();
+    };
+  });
+}
+
+function drawTable(stats){
+  const cls = v => v > 0.001 ? "up" : v < -0.001 ? "down" : "flat";
+  document.getElementById("tbody").innerHTML =
+    [...stats].sort((a,b)=>a.total-b.total).map(s=>`
+      <tr>
+        <td><div class="name"><span class="dot" style="background:${s.p.color}"></span>${s.p.name}</div></td>
+        <td>${fmt(s.latest)}</td>
+        <td class="${s.delta===null?"flat":cls(s.delta)}">${s.delta===null?"—":signed(s.delta)}</td>
+        <td class="${cls(s.total)}">${signed(s.total)}</td>
+        <td>${s.n}</td>
+      </tr>`).join("");
+}
+
+load();
+</script>
+</body>
+</html>
