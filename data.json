@@ -25,6 +25,11 @@
       "id": "hugo",
       "name": "Hugo",
       "color": "#e50000"
+    },
+    {
+      "id": "jorge",
+      "name": "Jorge",
+      "color": "#ffffff"
     }
   ],
   "entries": {
@@ -34,6 +39,13 @@
       "villa": 77.1,
       "mingo": 71.8,
       "hugo": 91.6
+    },
+    "2026-08-26": {
+      "vader": 99.2,
+      "rafa": 78.6,
+      "villa": 76.6,
+      "hugo": 91.4,
+      "jorge": 81.8
     }
   }
 }
