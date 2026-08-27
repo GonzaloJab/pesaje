@@ -2,8 +2,8 @@
   "unit": "kg",
   "people": [
     {
-      "id": "vader",
-      "name": "Vader",
+      "id": "jabat",
+      "name": "Jabat",
       "color": "#6c8cff"
     },
     {
@@ -34,14 +34,14 @@
   ],
   "entries": {
     "2026-08-25": {
-      "vader": 98.8,
+      "jabat": 98.8,
       "rafa": 78.9,
       "villa": 77.1,
       "mingo": 71.8,
       "hugo": 91.6
     },
     "2026-08-26": {
-      "vader": 99.2,
+      "jabat": 99.2,
       "rafa": 78.6,
       "villa": 76.6,
       "hugo": 91.4,
