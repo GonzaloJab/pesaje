@@ -30,11 +30,6 @@
       "id": "jorge",
       "name": "Jorge",
       "color": "#ffffff"
-    },
-    {
-      "id": "javi",
-      "name": "Javi",
-      "color": "#0000e5"
     }
   ],
   "entries": {
@@ -66,8 +61,7 @@
       "villa": 77,
       "mingo": 72.1,
       "hugo": 90.4,
-      "jorge": 82.2,
-      "javi": 80.8
+      "jorge": 82.2
     }
   }
 }
