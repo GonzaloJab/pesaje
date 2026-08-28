@@ -30,6 +30,11 @@
       "id": "jorge",
       "name": "Jorge",
       "color": "#ffffff"
+    },
+    {
+      "id": "javi",
+      "name": "Javi",
+      "color": "#0000e5"
     }
   ],
   "entries": {
@@ -54,6 +59,15 @@
       "mingo": 72.3,
       "hugo": 90.8,
       "jorge": 82.6
+    },
+    "2026-08-28": {
+      "jabat": 99.6,
+      "rafa": 67.9,
+      "villa": 77,
+      "mingo": 72.1,
+      "hugo": 90.4,
+      "jorge": 82.2,
+      "javi": 80.8
     }
   }
 }
