@@ -30,6 +30,16 @@
       "id": "jorge",
       "name": "Jorge",
       "color": "#ffffff"
+    },
+    {
+      "id": "alberto",
+      "name": "Alberto",
+      "color": "#6e00b6"
+    },
+    {
+      "id": "sancho",
+      "name": "Sancho",
+      "color": "#d3d000"
     }
   ],
   "entries": {
