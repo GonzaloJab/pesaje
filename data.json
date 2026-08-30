@@ -40,6 +40,16 @@
       "id": "sancho",
       "name": "Sancho",
       "color": "#d3d000"
+    },
+    {
+      "id": "jaime",
+      "name": "Jaime",
+      "color": "#095f00"
+    },
+    {
+      "id": "donalbert",
+      "name": "Donalbert",
+      "color": "#ffa095"
     }
   ],
   "entries": {
@@ -80,6 +90,18 @@
       "mingo": 72.2,
       "hugo": 89.9,
       "jorge": 82.5
+    },
+    "2026-08-30": {
+      "jabat": 99.4,
+      "rafa": 79.8,
+      "villa": 77.6,
+      "mingo": 71.6,
+      "hugo": 89.9,
+      "jorge": 83.4,
+      "alberto": 68.1,
+      "sancho": 69,
+      "jaime": 76.3,
+      "donalbert": 94.3
     }
   }
 }
