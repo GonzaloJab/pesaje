@@ -42,11 +42,6 @@
       "color": "#d3d000"
     },
     {
-      "id": "jaime",
-      "name": "Jaime",
-      "color": "#095f00"
-    },
-    {
       "id": "donalbert",
       "name": "Donalbert",
       "color": "#ffa095"
@@ -100,7 +95,6 @@
       "jorge": 83.4,
       "alberto": 68.1,
       "sancho": 69,
-      "jaime": 76.3,
       "donalbert": 94.3
     },
     "2026-08-31": {
