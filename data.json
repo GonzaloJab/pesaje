@@ -45,6 +45,16 @@
       "id": "donalbert",
       "name": "Donalbert",
       "color": "#ffa095"
+    },
+    {
+      "id": "emilio",
+      "name": "Emilio",
+      "color": "#2277ff"
+    },
+    {
+      "id": "juan-g",
+      "name": "Juan G",
+      "color": "#2277ff"
     }
   ],
   "entries": {
@@ -114,10 +124,12 @@
       "villa": 76.2,
       "mingo": 70.6,
       "hugo": 90,
-      "jorge": 83,
+      "jorge": 82.5,
       "alberto": 67.8,
       "sancho": 69,
-      "donalbert": 93.1
+      "donalbert": 93.1,
+      "emilio": 85,
+      "juan-g": 76.6
     }
   }
 }
