@@ -55,6 +55,11 @@
       "id": "juan-g",
       "name": "Juan G",
       "color": "#2277ff"
+    },
+    {
+      "id": "daviddd",
+      "name": "Daviddd",
+      "color": "#000000"
     }
   ],
   "entries": {
@@ -139,7 +144,8 @@
       "hugo": 89.5,
       "jorge": 81.4,
       "alberto": 68,
-      "donalbert": 93.7
+      "donalbert": 93.7,
+      "daviddd": 72.2
     }
   }
 }
