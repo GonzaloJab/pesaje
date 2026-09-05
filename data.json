@@ -60,6 +60,11 @@
       "id": "daviddd",
       "name": "Daviddd",
       "color": "#000000"
+    },
+    {
+      "id": "juan-nas",
+      "name": "Juan Ñas",
+      "color": "#00f1f3"
     }
   ],
   "entries": {
@@ -146,6 +151,18 @@
       "alberto": 68,
       "donalbert": 93.7,
       "daviddd": 72.2
+    },
+    "2026-09-05": {
+      "jabat": 99.6,
+      "rafa": 78,
+      "villa": 76.5,
+      "mingo": 73.3,
+      "hugo": 89.5,
+      "jorge": 82.8,
+      "sancho": 67.7,
+      "donalbert": 93.1,
+      "daviddd": 71.5,
+      "juan-nas": 75.3
     }
   }
 }
