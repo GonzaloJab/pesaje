@@ -65,6 +65,46 @@
       "id": "juan-nas",
       "name": "Juan Ñas",
       "color": "#00f1f3"
+    },
+    {
+      "id": "rafa-lop",
+      "name": "Rafa Lop",
+      "color": "#61187c"
+    },
+    {
+      "id": "hugo-camacho",
+      "name": "Hugo Camacho",
+      "color": "#fff76b"
+    },
+    {
+      "id": "javi-lor",
+      "name": "Javi Lor",
+      "color": "#4e7a27"
+    },
+    {
+      "id": "cosme",
+      "name": "Cosme",
+      "color": "#cbf0ff"
+    },
+    {
+      "id": "toni",
+      "name": "Toni",
+      "color": "#333333"
+    },
+    {
+      "id": "luis",
+      "name": "Luis",
+      "color": "#00374a"
+    },
+    {
+      "id": "raul",
+      "name": "Raul",
+      "color": "#52d6fc"
+    },
+    {
+      "id": "jaime-rey",
+      "name": "Jaime Rey",
+      "color": "#7b2900"
     }
   ],
   "entries": {
@@ -163,6 +203,27 @@
       "donalbert": 93.1,
       "daviddd": 71.5,
       "juan-nas": 75.3
+    },
+    "2026-09-20": {
+      "jabat": 100,
+      "rafa": 79,
+      "villa": 76,
+      "mingo": 72,
+      "hugo": 90,
+      "jorge": 82,
+      "alberto": 69,
+      "sancho": 69,
+      "donalbert": 93,
+      "emilio": 88,
+      "juan-nas": 76,
+      "rafa-lop": 77,
+      "hugo-camacho": 90,
+      "javi-lor": 79,
+      "cosme": 67,
+      "toni": 111,
+      "luis": 77,
+      "raul": 70,
+      "jaime-rey": 67
     }
   }
 }
