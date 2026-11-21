@@ -4,209 +4,586 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Pesaje Diario · admin</title>
+<title>Pesaje · administración</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1115;--panel:#171a21;--panel-2:#1e222b;--line:#2a2f3a;--text:#e8eaf0;
-        --muted:#8b93a7;--accent:#6c8cff;--ok:#38d39f;--err:#ff5d5d;--radius:12px}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);padding:24px 16px 80px;
-       font:15px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-  .wrap{max-width:620px;margin:0 auto}
-  h1{font-size:20px;margin:0 0 4px} .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
-  section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-          padding:16px;margin-bottom:16px}
-  h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px;font-weight:600}
-  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
-  input{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
-        border-radius:9px;padding:10px 12px;font:inherit}
-  input:focus{outline:none;border-color:var(--accent)}
-  .row{display:flex;gap:10px;align-items:end}
-  .row > div{flex:1}
-  button{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:11px 16px;
-         font:inherit;font-weight:600;cursor:pointer}
-  button.ghost{background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-weight:500}
-  button:disabled{opacity:.5;cursor:not-allowed}
-  .people{display:flex;flex-direction:column;gap:10px}
-  .person{display:flex;align-items:center;gap:10px}
-  .person .nm{flex:1;display:flex;align-items:center;gap:8px}
-  .person input{width:110px;text-align:right}
-  .dot{width:10px;height:10px;border-radius:50%;flex:none}
-  .last{color:var(--muted);font-size:12px;width:84px;text-align:right}
-  .msg{margin-top:12px;font-size:13px;min-height:20px}
-  .msg.ok{color:var(--ok)} .msg.err{color:var(--err)} .msg.info{color:var(--muted)}
-  .hint{font-size:12px;color:var(--muted);margin-top:8px}
-  a{color:var(--accent)}
+  :root {
+    --naranja: #f1901d;
+    --carbon: #18272d;
+    --ambar: #f9b966;
+    --quemado: #c66e09;
+    --marfil: #faf9f6;
+    --arena: #f1efea;
+    --piedra: #5a676d;
+    --borde: #dce1e3;
+    --exito: #1e7e5a;
+    --error: #c83e37;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--marfil);
+    color: var(--carbon);
+    font-family: "DM Sans", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+  }
+  h1, h2, p { margin: 0; }
+  .envoltura { width: min(880px, calc(100% - 2rem)); margin: 0 auto; }
+  .portada { background: var(--carbon); color: var(--marfil); padding: 2.2rem 0 2rem; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ambar); }
+  .portada h1 { margin-top: .55rem; font-size: clamp(28px, 4vw, 36px); font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+  .portada p { margin-top: .7rem; max-width: 38rem; color: #dce1e3; }
+  .bloque { background: white; border: 1px solid var(--borde); border-radius: 10px; padding: 1.1rem 1.15rem 1.2rem; margin-top: 1rem; }
+  .bloque h2 { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--quemado); margin: 0 0 .75rem; }
+  .bloque h2 + h2, .sep { margin-top: 1.3rem; }
+  label { display: block; font-size: 13px; color: var(--piedra); margin: .7rem 0 .3rem; }
+  input, select {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--borde);
+    color: var(--carbon);
+    border-radius: 8px;
+    padding: .65rem .75rem;
+    font: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--quemado); }
+  .fila { display: flex; gap: .7rem; align-items: end; }
+  .fila > div { flex: 1; }
+  button {
+    background: var(--naranja);
+    color: var(--carbon);
+    border: 0;
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.secundario { background: white; border: 1px solid var(--borde); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .acciones { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+  .persona, .apuesta {
+    display: grid;
+    gap: .6rem;
+    align-items: center;
+    padding: .6rem 0;
+    border-top: 1px solid var(--borde);
+  }
+  .persona { grid-template-columns: minmax(7rem, 1.2fr) 7.5rem minmax(6.5rem, 8rem) auto; }
+  button.quitar { background: white; border: 1px solid var(--borde); color: var(--error); padding: .45rem .7rem; }
+  .apuesta { grid-template-columns: minmax(7rem, .9fr) minmax(10rem, 1.4fr) auto; }
+  .nm { display: flex; align-items: center; gap: .5rem; font-weight: 600; }
+  .punto { width: 10px; height: 10px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(24,39,45,.28); }
+  .anterior { color: var(--piedra); font-size: 13px; text-align: right; }
+  .persona input { text-align: right; }
+  .dirs { display: flex; gap: .4rem; }
+  button.dir { background: white; border: 1px solid var(--borde); padding: .55rem .7rem; }
+  button.dir.on.sube { background: var(--error); color: white; border-color: var(--error); }
+  button.dir.on.baja { background: var(--exito); color: white; border-color: var(--exito); }
+  .msg { margin-top: .7rem; font-size: 14px; min-height: 1.2em; }
+  .msg.ok { color: var(--exito); }
+  .msg.err { color: var(--error); }
+  .msg.info { color: var(--piedra); }
+  .pista { color: var(--piedra); font-size: 13px; margin-top: .7rem; }
+  .resuelta { padding: .55rem 0; border-top: 1px solid var(--borde); font-size: 14px; }
+  .resuelta:first-child { border-top: 0; }
+  .hit { color: var(--exito); font-weight: 700; }
+  .miss { color: var(--error); font-weight: 700; }
+  a { color: var(--carbon); font-weight: 600; }
+  .pie { margin: 1.4rem 0 2.5rem; text-align: center; color: var(--piedra); font-size: 14px; }
+  @media (max-width: 700px) {
+    .persona, .apuesta { grid-template-columns: 1fr; }
+    .anterior { text-align: left; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Pesaje Diario · admin</h1>
-  <div class="sub">Página privada. No se guarda nada sin tu token de GitHub.</div>
-
-  <section id="cfg">
-    <h2>Conexión</h2>
-    <div class="row">
-      <div><label>Usuario u organización de GitHub</label><input id="owner" placeholder="tu-usuario"></div>
-      <div><label>Repositorio</label><input id="repo" placeholder="pesaje"></div>
+  <header class="portada">
+    <div class="envoltura">
+      <p class="eyebrow">Colegio Mayor Peñafiel</p>
+      <h1>Pesaje · administración</h1>
+      <p>Se anotan los kilos y, en la misma semana, una apuesta por colegial. Los puntos de la página pública se calculan al guardar: no hay un marcador aparte.</p>
     </div>
-    <label>Rama</label><input id="branch" value="main">
-    <label>Token de acceso personal (se guarda solo en este navegador)</label>
-    <input id="token" type="password" placeholder="github_pat_...">
-    <div class="row" style="margin-top:14px">
-      <button id="connect">Conectar y cargar</button>
-      <button class="ghost" id="forget" style="flex:none">Olvidar token</button>
+  </header>
+
+  <main class="envoltura">
+    <section class="bloque" id="acceso">
+      <h2>Acceso</h2>
+      <form id="accesoform">
+        <label for="usuario">Usuario</label>
+        <input id="usuario" autocomplete="username" required>
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" autocomplete="current-password" required>
+        <div class="acciones"><button type="submit">Entrar</button></div>
+        <div class="msg" id="accesomsg"></div>
+      </form>
+    </section>
+
+    <div id="app" hidden>
+    <section class="bloque" id="cfg">
+      <h2>Conexión</h2>
+      <div class="fila">
+        <div><label>Usuario de GitHub</label><input id="owner" placeholder="tu-usuario" autocomplete="username"></div>
+        <div><label>Repositorio</label><input id="repo" placeholder="pesaje"></div>
+      </div>
+      <label>Rama</label><input id="branch" value="main">
+      <label>Token (solo en este navegador)</label>
+      <input id="token" type="password" placeholder="github_pat_…" autocomplete="current-password">
+      <div class="acciones">
+        <button type="button" id="connect">Conectar y cargar</button>
+        <button type="button" class="secundario" id="forget">Olvidar token</button>
+        <button type="button" class="secundario" id="salir">Salir</button>
+      </div>
+      <div class="msg info" id="cfgmsg"></div>
+    </section>
+
+    <section class="bloque" id="entry" hidden>
+      <h2>Semana</h2>
+      <label for="date">Fecha del pesaje</label>
+      <input id="date" type="date">
+      <h2 class="sep">Pesos</h2>
+      <div id="people"></div>
+      <p class="pista">Deja el peso vacío si esa persona no viene. El cambio de la apuesta se mide contra el número de «anterior», no contra otro día.</p>
+    </section>
+
+    <section class="bloque" id="betsec" hidden>
+      <h2>Apuestas</h2>
+      <p class="pista" style="margin-top:0">Una por persona: otro colegial, y si sube o baja. Acierto, 3 puntos. Si no cambia el peso o no se pesa, no suma. Sin apuesta, se deja en blanco.</p>
+      <div id="apuestas"></div>
+    </section>
+
+    <section class="bloque" id="preview" hidden>
+      <h2>Resolución de esta semana</h2>
+      <div id="previewbody"></div>
+      <div class="acciones">
+        <button type="button" id="savelocal" hidden>Guardar en este ordenador</button>
+        <button type="button" id="save">Guardar en GitHub</button>
+      </div>
+      <div class="msg" id="savemsg"></div>
+    </section>
+
+    <section class="bloque" id="addp" hidden>
+      <h2>Añadir colegial</h2>
+      <div class="fila">
+        <div><label>Nombre</label><input id="newname" placeholder="Sofía"></div>
+        <div style="flex:none"><label>Color</label><input id="newcolor" type="color" value="#c66e09" style="width:4.2rem;padding:.35rem"></div>
+      </div>
+      <div class="acciones"><button type="button" class="secundario" id="addbtn">Añadir</button></div>
+      <p class="pista">Entra en la porra desde el primer día en que se le anota un peso. Hasta entonces nadie puede apostar por él.</p>
+      <div class="msg" id="addmsg"></div>
+    </section>
+
+    <p class="pie"><a href="index.html">Ver la clasificación</a></p>
     </div>
-    <div class="msg info" id="cfgmsg"></div>
-  </section>
-
-  <section id="entry" hidden>
-    <h2>Registro del día</h2>
-    <label>Fecha</label><input id="date" type="date">
-    <div class="people" id="people" style="margin-top:16px"></div>
-    <div class="hint">Deja un campo vacío para saltarte a esa persona en esa fecha.</div>
-    <div style="margin-top:16px"><button id="save">Guardar en GitHub</button></div>
-    <div class="msg" id="savemsg"></div>
-  </section>
-
-  <section id="addp" hidden>
-    <h2>Añadir persona</h2>
-    <div class="row">
-      <div><label>Nombre</label><input id="newname" placeholder="Sofía"></div>
-      <div style="flex:none"><label>Color</label><input id="newcolor" type="color" value="#ff6fae" style="width:56px;padding:4px"></div>
-    </div>
-    <div style="margin-top:14px"><button class="ghost" id="addbtn">Añadir persona</button></div>
-    <div class="hint">Se incorpora desde la primera fecha en la que le registres un peso; los días anteriores quedan en blanco.</div>
-    <div class="msg" id="addmsg"></div>
-  </section>
-
-  <div class="sub" style="text-align:center">
-    <a href="index.html">← ver el gráfico público</a>
-  </div>
-</div>
+  </main>
 
 <script>
 const $ = id => document.getElementById(id);
 const API = "https://api.github.com";
+const ACIERTO = 3;
+/* Acceso a esta página. Cámbialo aquí. */
+const ACCESO = { usuario: "penafiel", clave: "pesaje" };
+const LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
 let DATA = null, SHA = null;
 
-/* ---------- configuración guardada (localStorage, solo este navegador) ---------- */
+const fmt = n => (Math.round(Number(n) * 10) / 10).toFixed(1).replace(".", ",");
+const colorOk = c => /^#[0-9a-fA-F]{6}$/.test(c || "") ? c : "#18272d";
+function trazo(hex){
+  const h = colorOk(hex).slice(1);
+  const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  if (lum < 0.62) return "#" + h;
+  const k = 0.45, p = n => Math.round(n * k).toString(16).padStart(2,"0");
+  return "#" + p(r) + p(g) + p(b);
+}
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+function msg(id, cls, text){ const e = $(id); e.className = "msg " + cls; e.textContent = text; }
+function hoy(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function nombre(data, id){ return data.people.find(p => p.id === id)?.name || id; }
+
 const CFG_KEYS = ["owner","repo","branch","token"];
-CFG_KEYS.forEach(k => { const v = localStorage.getItem("pd_"+k); if(v) $(k).value = v; });
-function saveCfg(){ CFG_KEYS.forEach(k => localStorage.setItem("pd_"+k, $(k).value.trim())); }
-$("forget").onclick = () => { CFG_KEYS.forEach(k => localStorage.removeItem("pd_"+k)); $("token").value=""; msg("cfgmsg","info","Borrado."); };
+CFG_KEYS.forEach(k => { const v = localStorage.getItem("pd_" + k); if (v) $(k).value = v; });
+function saveCfg(){ CFG_KEYS.forEach(k => localStorage.setItem("pd_" + k, $(k).value.trim())); }
+$("forget").onclick = () => { CFG_KEYS.forEach(k => localStorage.removeItem("pd_" + k)); $("token").value = ""; msg("cfgmsg","info","Token borrado de este navegador."); };
+const cfg = () => ({
+  owner: $("owner").value.trim(),
+  repo: $("repo").value.trim(),
+  branch: $("branch").value.trim() || "main",
+  token: $("token").value.trim()
+});
 
-function msg(id,cls,text){ const e=$(id); e.className="msg "+cls; e.textContent=text; }
-const cfg = () => ({ owner:$("owner").value.trim(), repo:$("repo").value.trim(),
-                     branch:$("branch").value.trim()||"main", token:$("token").value.trim() });
-
-/* base64 <-> utf8 */
 const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
-const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,"")), c=>c.charCodeAt(0)));
+const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, "")), c => c.charCodeAt(0)));
 
-async function gh(path, opts={}){
+function normalize(){
+  DATA.people = DATA.people || [];
+  DATA.entries = DATA.entries || {};
+  DATA.bets = DATA.bets || {};
+  DATA.unit = DATA.unit || "kg";
+}
+function payload(){
+  return { unit: DATA.unit || "kg", bets: DATA.bets || {}, people: DATA.people, entries: DATA.entries };
+}
+
+function prevWeight(data, pid, before){
+  const dates = Object.keys(data.entries).filter(d => d < before).sort();
+  for (let i = dates.length - 1; i >= 0; i--) {
+    const v = data.entries[dates[i]][pid];
+    if (typeof v === "number") return { date: dates[i], value: v };
+  }
+  return null;
+}
+function resolveBet(data, date, bet){
+  if (!bet || !bet.on || (bet.dir !== "up" && bet.dir !== "down")) return { status:"empty" };
+  const day = data.entries[date] || {};
+  const hayPesaje = Object.values(day).some(v => typeof v === "number");
+  const base = { on: bet.on, dir: bet.dir };
+  if (!hayPesaje) return { ...base, status:"pending", points:0 };
+  const cur = day[bet.on];
+  if (typeof cur !== "number") return { ...base, status:"void", points:0 };
+  const prev = prevWeight(data, bet.on, date);
+  if (!prev) return { ...base, status:"void", points:0 };
+  const delta = Math.round((cur - prev.value) * 10) / 10;
+  if (delta === 0) return { ...base, status:"flat", delta, cur, points:0 };
+  const hit = (bet.dir === "up" && delta > 0) || (bet.dir === "down" && delta < 0);
+  return { ...base, status: hit ? "hit" : "miss", delta, cur, points: hit ? ACIERTO : 0 };
+}
+function tally(data, except){
+  const acc = {};
+  data.people.forEach(p => { acc[p.id] = 0; });
+  Object.keys(data.bets || {}).forEach(date => {
+    if (date === except) return;
+    Object.entries(data.bets[date] || {}).forEach(([pid, bet]) => {
+      if (!(pid in acc)) return;
+      const r = resolveBet(data, date, bet);
+      if (r.status === "hit") acc[pid] += r.points;
+    });
+  });
+  return acc;
+}
+
+function draftDay(){
+  const day = {};
+  document.querySelectorAll("#people input[data-id]").forEach(inp => {
+    const v = inp.value.trim().replace(",", ".");
+    if (v === "") return;
+    const num = parseFloat(v);
+    if (!isNaN(num)) day[inp.dataset.id] = Math.round(num * 10) / 10;
+  });
+  return day;
+}
+function draftBets(){
+  const bets = {};
+  document.querySelectorAll("#apuestas .apuesta").forEach(row => {
+    const on = row.querySelector("select").value;
+    const dirBtn = row.querySelector("button.dir.on");
+    if (on && dirBtn) bets[row.dataset.id] = { on, dir: dirBtn.dataset.dir };
+  });
+  return bets;
+}
+function viewData(){
+  const date = $("date").value;
+  const entries = { ...DATA.entries };
+  const bets = { ...(DATA.bets || {}) };
+  if (date) {
+    const day = draftDay();
+    const b = draftBets();
+    if (Object.keys(day).length) entries[date] = day; else delete entries[date];
+    if (Object.keys(b).length) bets[date] = b; else delete bets[date];
+  }
+  return { ...DATA, entries, bets };
+}
+
+function ready(text){
+  msg("cfgmsg", "ok", `${text} · ${DATA.people.length} colegiales · ${Object.keys(DATA.entries).length} pesajes`);
+  $("entry").hidden = false;
+  $("betsec").hidden = false;
+  $("preview").hidden = false;
+  $("addp").hidden = false;
+  if (!$("date").value) $("date").value = hoy();
+  if (LOCAL) {
+    $("savelocal").hidden = false;
+    $("save").classList.add("secundario");
+  }
+  renderAll(false);
+}
+
+async function loadLocal(){
+  msg("cfgmsg", "info", "Cargando datos…");
+  try {
+    const res = await fetch("data.json?t=" + Date.now(), { cache:"no-store" });
+    if (!res.ok) throw new Error("No se encuentra data.json");
+    DATA = await res.json();
+    normalize();
+    ready(LOCAL ? "Copia local cargada. Guardar aquí no publica en GitHub." : "Datos publicados cargados. Para guardarlos hace falta el token.");
+  } catch (e) {
+    msg("cfgmsg", "err", e.message);
+  }
+}
+
+async function gh(path, opts = {}){
   const c = cfg();
-  const res = await fetch(API+path, {...opts, headers:{
-    "Authorization":"Bearer "+c.token,
-    "Accept":"application/vnd.github+json",
-    "X-GitHub-Api-Version":"2022-11-28",
-    ...(opts.headers||{})
+  const res = await fetch(API + path, { ...opts, headers: {
+    "Authorization": "Bearer " + c.token,
+    "Accept": "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    ...(opts.headers || {})
   }});
-  if(!res.ok) throw new Error(res.status+" "+(await res.text()).slice(0,180));
+  if (!res.ok) throw new Error(res.status + " " + (await res.text()).slice(0, 180));
   return res.json();
 }
 
-/* ---------- cargar ---------- */
 $("connect").onclick = async () => {
   const c = cfg();
-  if(!c.owner || !c.repo || !c.token){ return msg("cfgmsg","err","Rellena usuario, repositorio y token."); }
+  if (!c.owner || !c.repo || !c.token) return msg("cfgmsg", "err", "Rellena usuario, repositorio y token.");
   saveCfg();
-  msg("cfgmsg","info","Cargando data.json…");
-  try{
+  msg("cfgmsg", "info", "Cargando data.json desde GitHub…");
+  try {
     const j = await gh(`/repos/${c.owner}/${c.repo}/contents/data.json?ref=${encodeURIComponent(c.branch)}`);
     SHA = j.sha;
     DATA = JSON.parse(unb64(j.content));
-    DATA.people = DATA.people || [];
-    DATA.entries = DATA.entries || {};
-    DATA.unit = DATA.unit || "kg";
-    msg("cfgmsg","ok",`Conectado · ${DATA.people.length} personas · ${Object.keys(DATA.entries).length} días`);
-    $("entry").hidden = false; $("addp").hidden = false;
-    $("date").value = new Date().toISOString().slice(0,10);
-    renderPeople();
-  }catch(e){ msg("cfgmsg","err","Error: "+e.message); }
+    normalize();
+    ready("Conectado a GitHub. Guardar publica este archivo.");
+  } catch (e) {
+    msg("cfgmsg", "err", "Error: " + e.message);
+  }
 };
 
-/* ---------- formulario del día ---------- */
-function lastOf(pid){
-  const ds = Object.keys(DATA.entries).sort().reverse();
-  for(const d of ds) if(typeof DATA.entries[d][pid] === "number") return DATA.entries[d][pid];
-  return null;
-}
-function renderPeople(){
-  const day = DATA.entries[$("date").value] || {};
-  $("people").innerHTML = DATA.people.map(p=>{
-    const cur = typeof day[p.id]==="number" ? day[p.id] : "";
-    const prev = lastOf(p.id);
-    return `<div class="person">
-      <div class="nm"><span class="dot" style="background:${p.color}"></span>${p.name}</div>
-      <span class="last">${prev===null?"—":"último "+prev}</span>
-      <input type="number" step="0.1" min="0" inputmode="decimal" data-id="${p.id}" value="${cur}" placeholder="${DATA.unit}">
+function renderPeople(draft){
+  const date = $("date").value;
+  const day = draft ? draft.day : ((DATA.entries || {})[date] || {});
+  $("people").innerHTML = DATA.people.map(p => {
+    const cur = typeof day[p.id] === "number" ? day[p.id] : "";
+    const prev = date ? prevWeight(DATA, p.id, date) : null;
+    return `<div class="persona">
+      <div class="nm"><span class="punto" style="background:${trazo(p.color)}"></span>${esc(p.name)}</div>
+      <span class="anterior">${prev ? "anterior " + fmt(prev.value) : "sin anterior"}</span>
+      <input type="number" step="0.1" min="0" inputmode="decimal" data-id="${esc(p.id)}" value="${cur}" placeholder="kg" aria-label="Peso de ${esc(p.name)}">
+      <button type="button" class="quitar" data-id="${esc(p.id)}">Eliminar</button>
     </div>`;
-  }).join("") || '<div class="hint">Aún no hay personas — añade una abajo.</div>';
+  }).join("") || `<p class="pista">Todavía no hay colegiales.</p>`;
+  $("people").querySelectorAll("input").forEach(inp => { inp.oninput = renderPreview; });
+  $("people").querySelectorAll("button.quitar").forEach(btn => {
+    btn.onclick = () => {
+      if (btn.dataset.armado === "1") quitarPersona(btn.dataset.id);
+      else {
+        $("people").querySelectorAll("button.quitar").forEach(b => {
+          b.dataset.armado = "";
+          b.textContent = "Eliminar";
+        });
+        btn.dataset.armado = "1";
+        btn.textContent = "Confirmar";
+      }
+    };
+  });
 }
-$("date").onchange = renderPeople;
 
-/* ---------- añadir persona ---------- */
+function quitarPersona(id){
+  const p = DATA.people.find(x => x.id === id);
+  if (!p) return;
+  const draft = { day: draftDay(), bets: draftBets() };
+  delete draft.day[id];
+  delete draft.bets[id];
+  Object.keys(draft.bets).forEach(pid => {
+    if (draft.bets[pid] && draft.bets[pid].on === id) delete draft.bets[pid];
+  });
+  DATA.people = DATA.people.filter(x => x.id !== id);
+  Object.keys(DATA.entries).forEach(d => { if (DATA.entries[d]) delete DATA.entries[d][id]; });
+  Object.keys(DATA.bets || {}).forEach(d => {
+    const round = DATA.bets[d];
+    if (!round) return;
+    delete round[id];
+    Object.keys(round).forEach(pid => {
+      if (round[pid] && round[pid].on === id) delete round[pid];
+    });
+    if (!Object.keys(round).length) delete DATA.bets[d];
+  });
+  renderPeople(draft);
+  renderBets(draft);
+  renderPreview();
+  msg("savemsg", "info", p.name + " fuera de la lista. Guarda para publicarlo. Si recargas sin guardar, vuelve a aparecer.");
+}
+
+function renderBets(draft){
+  const date = $("date").value;
+  const saved = draft ? draft.bets : ((DATA.bets || {})[date] || {});
+  $("apuestas").innerHTML = DATA.people.map(p => {
+    const bet = saved[p.id] || {};
+    const options = DATA.people.filter(o => o.id !== p.id).map(o => {
+      const prev = date ? prevWeight(DATA, o.id, date) : null;
+      const sel = bet.on === o.id ? " selected" : "";
+      const extra = prev ? ` · ${fmt(prev.value)} kg` : " · sin pesaje anterior";
+      return `<option value="${esc(o.id)}"${prev ? "" : " disabled"}${sel}>${esc(o.name)}${extra}</option>`;
+    }).join("");
+    return `<div class="apuesta" data-id="${esc(p.id)}">
+      <div class="nm"><span class="punto" style="background:${trazo(p.color)}"></span>${esc(p.name)}</div>
+      <select aria-label="Apuesta de ${esc(p.name)}"><option value="">Sin apuesta</option>${options}</select>
+      <div class="dirs">
+        <button type="button" class="dir sube${bet.dir === "up" ? " on" : ""}" data-dir="up">Sube</button>
+        <button type="button" class="dir baja${bet.dir === "down" ? " on" : ""}" data-dir="down">Baja</button>
+      </div>
+    </div>`;
+  }).join("");
+  $("apuestas").querySelectorAll("select").forEach(s => { s.onchange = renderPreview; });
+  $("apuestas").querySelectorAll("button.dir").forEach(b => {
+    b.onclick = () => {
+      const ya = b.classList.contains("on");
+      b.parentElement.querySelectorAll("button.dir").forEach(x => x.classList.remove("on"));
+      if (!ya) b.classList.add("on");
+      renderPreview();
+    };
+  });
+}
+
+function textoResolucion(data, pid, r){
+  const quien = nombre(data, pid);
+  const sobre = nombre(data, r.on);
+  const dijo = r.dir === "up" ? "sube" : "baja";
+  if (r.status === "pending") return `${quien} apuesta a que ${sobre} ${dijo}. Falta publicar los pesos.`;
+  if (r.status === "void") return `${quien} apuesta a que ${sobre} ${dijo}. No suma: no hay con qué comparar.`;
+  if (r.status === "flat") return `${quien} apuesta a que ${sobre} ${dijo}. Se queda en ${fmt(r.cur)} kg y no suma.`;
+  const movio = r.delta > 0 ? `sube ${fmt(r.delta)}` : `baja ${fmt(Math.abs(r.delta))}`;
+  return `${quien} apuesta a que ${sobre} ${dijo}. ${sobre} ${movio} kg.`;
+}
+
+function renderPreview(){
+  if (!DATA) return;
+  const data = viewData();
+  const date = $("date").value;
+  const round = (data.bets || {})[date] || {};
+  const ids = Object.keys(round);
+  if (!ids.length) {
+    $("previewbody").innerHTML = `<p class="pista" style="margin-top:0">Elige colegial y dirección para ver si la apuesta suma.</p>`;
+    return;
+  }
+  const previos = tally(data, date);
+  $("previewbody").innerHTML = ids.map(pid => {
+    const r = resolveBet(data, date, round[pid]);
+    const total = (previos[pid] || 0) + (r.points || 0);
+    const marca = r.status === "hit" ? `<span class="hit">Acierto · ${total} pts</span>`
+      : r.status === "miss" ? `<span class="miss">Fallo · ${total} pts</span>`
+      : `<span>${total} pts</span>`;
+    return `<div class="resuelta">${esc(textoResolucion(data, pid, r))} ${marca}</div>`;
+  }).join("");
+}
+
+function renderAll(keep){
+  const draft = keep ? { day: draftDay(), bets: draftBets() } : null;
+  renderPeople(draft);
+  renderBets(draft);
+  renderPreview();
+}
+$("date").onchange = () => renderAll(false);
+
 $("addbtn").onclick = () => {
   const name = $("newname").value.trim();
-  if(!name) return msg("addmsg","err","El nombre es obligatorio.");
-  let id = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-              .replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || ("p"+Date.now());
-  while(DATA.people.some(p=>p.id===id)) id += "1";
-  DATA.people.push({ id, name, color:$("newcolor").value });
+  if (!name) return msg("addmsg", "err", "El nombre es obligatorio.");
+  let id = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || ("p" + Date.now());
+  while (DATA.people.some(p => p.id === id)) id += "1";
+  const draft = { day: draftDay(), bets: draftBets() };
+  DATA.people.push({ id, name, color: $("newcolor").value });
   $("newname").value = "";
-  renderPeople();
-  msg("addmsg","info", `«${name}» añadida en local — pulsa Guardar para publicarla.`);
+  renderPeople(draft);
+  renderBets(draft);
+  renderPreview();
+  msg("addmsg", "info", `${name} está en el formulario. Guarda para que quede publicado.`);
 };
 
-/* ---------- guardar ---------- */
-$("save").onclick = async () => {
+function commitDraft(){
   const date = $("date").value;
-  if(!date) return msg("savemsg","err","Elige una fecha.");
-  const day = { ...(DATA.entries[date] || {}) };
-  let n = 0;
-  $("people").querySelectorAll("input[data-id]").forEach(inp=>{
-    const v = inp.value.trim();
-    if(v === "") { delete day[inp.dataset.id]; return; }
-    const num = parseFloat(v);
-    if(!isNaN(num)){ day[inp.dataset.id] = Math.round(num*10)/10; n++; }
-  });
-  if(Object.keys(day).length) DATA.entries[date] = day; else delete DATA.entries[date];
-
-  // mantener las fechas ordenadas en el archivo
+  if (!date) return { error: "Elige una fecha." };
+  const day = draftDay();
+  const bets = draftBets();
+  if (Object.keys(day).length) DATA.entries[date] = day; else delete DATA.entries[date];
+  if (Object.keys(bets).length) DATA.bets[date] = bets; else delete DATA.bets[date];
+  const entries = {};
+  Object.keys(DATA.entries).sort().forEach(d => { entries[d] = DATA.entries[d]; });
+  DATA.entries = entries;
   const sorted = {};
-  Object.keys(DATA.entries).sort().forEach(d => sorted[d] = DATA.entries[d]);
-  DATA.entries = sorted;
+  Object.keys(DATA.bets).sort().forEach(d => { sorted[d] = DATA.bets[d]; });
+  DATA.bets = sorted;
+  return { date, n: Object.keys(day).length, b: Object.keys(bets).length };
+}
 
+$("savelocal").onclick = async () => {
+  const r = commitDraft();
+  if (r.error) return msg("savemsg", "err", r.error);
+  $("savelocal").disabled = true;
+  msg("savemsg", "info", "Guardando en este ordenador…");
+  try {
+    const res = await fetch("/api/data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload())
+    });
+    if (!res.ok) throw new Error((await res.text()).slice(0, 180));
+    msg("savemsg", "ok", `Guardados ${r.n} pesos y ${r.b} apuestas del ${r.date}. La clasificación local ya puede leerlos.`);
+    renderAll(false);
+  } catch (e) {
+    msg("savemsg", "err", "No se pudo guardar en local. Abre la página con servir.py. " + e.message);
+  } finally {
+    $("savelocal").disabled = false;
+  }
+};
+
+$("save").onclick = async () => {
   const c = cfg();
+  if (!c.owner || !c.repo || !c.token || !SHA) {
+    return msg("savemsg", "err", "Conecta con GitHub antes de publicar. El guardado local no sube el archivo.");
+  }
+  const r = commitDraft();
+  if (r.error) return msg("savemsg", "err", r.error);
   $("save").disabled = true;
-  msg("savemsg","info","Guardando…");
-  try{
+  msg("savemsg", "info", "Publicando…");
+  try {
     const res = await gh(`/repos/${c.owner}/${c.repo}/contents/data.json`, {
-      method:"PUT",
+      method: "PUT",
       body: JSON.stringify({
-        message: `pesos ${date} (${n} registros)`,
-        content: b64(JSON.stringify(DATA, null, 2) + "\n"),
+        message: `pesaje ${r.date} (${r.n} pesos, ${r.b} apuestas)`,
+        content: b64(JSON.stringify(payload(), null, 2) + "\n"),
         sha: SHA,
         branch: c.branch
       })
     });
     SHA = res.content.sha;
-    msg("savemsg","ok",`Guardados ${n} pesos del ${date}. Visible en ~1 minuto.`);
-    renderPeople();
-  }catch(e){
-    msg("savemsg","err","Error al guardar: "+e.message+" — recarga la página e inténtalo de nuevo.");
-  }finally{ $("save").disabled = false; }
+    msg("savemsg", "ok", `Publicados ${r.n} pesos y ${r.b} apuestas del ${r.date}. En la web se ven en torno a un minuto.`);
+    renderAll(false);
+  } catch (e) {
+    msg("savemsg", "err", "Error al publicar: " + e.message);
+  } finally {
+    $("save").disabled = false;
+  }
 };
+
+function mostrarApp(){
+  $("acceso").hidden = true;
+  $("app").hidden = false;
+  if (!DATA) loadLocal();
+}
+$("accesoform").onsubmit = ev => {
+  ev.preventDefault();
+  const ok = $("usuario").value.trim() === ACCESO.usuario && $("clave").value === ACCESO.clave;
+  if (!ok) return msg("accesomsg", "err", "Usuario o contraseña incorrectos.");
+  $("clave").value = "";
+  msg("accesomsg", "", "");
+  sessionStorage.setItem("pd_sesion", "1");
+  mostrarApp();
+};
+$("salir").onclick = () => {
+  sessionStorage.removeItem("pd_sesion");
+  $("app").hidden = true;
+  $("acceso").hidden = false;
+  $("usuario").focus();
+};
+if (sessionStorage.getItem("pd_sesion") === "1") mostrarApp();
 </script>
 </body>
 </html>

@@ -3,319 +3,561 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pesaje Diario</title>
+<title>Pesaje semanal · Colegio Mayor Peñafiel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0f1115; --panel:#171a21; --panel-2:#1e222b; --line:#2a2f3a;
-    --text:#e8eaf0; --muted:#8b93a7; --up:#ff5d5d; --down:#38d39f; --accent:#6c8cff;
-    --radius:14px;
+  :root {
+    --naranja: #f1901d;
+    --carbon: #18272d;
+    --ambar: #f9b966;
+    --quemado: #c66e09;
+    --marfil: #faf9f6;
+    --arena: #f1efea;
+    --piedra: #5a676d;
+    --borde: #dce1e3;
+    --exito: #1e7e5a;
+    --error: #c83e37;
   }
-  *{box-sizing:border-box}
-  body{
-    margin:0; background:var(--bg); color:var(--text);
-    font:15px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    padding:24px 16px 64px;
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--marfil);
+    color: var(--carbon);
+    font-family: "DM Sans", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
   }
-  .wrap{max-width:960px;margin:0 auto}
-  header.top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-  h1{font-size:22px;margin:0;letter-spacing:-.02em}
-  .sub{color:var(--muted);font-size:13px}
-
-  /* ---- cabecera de subidas y bajadas ---- */
-  .movers{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:20px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
-  .card .label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
-  .card .who{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px}
-  .card .val{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
-  .card .note{font-size:12px;color:var(--muted);margin-top:2px}
-  .dot{width:10px;height:10px;border-radius:50%;flex:none}
-  .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
-
-  /* ---- gráfico ---- */
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
-  .chartbox{position:relative}
-  svg{width:100%;height:auto;display:block;overflow:visible}
-  .grid{stroke:var(--line);stroke-width:1}
-  .axis{fill:var(--muted);font-size:11px}
-  .series{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-  .pt{stroke:var(--panel);stroke-width:2;cursor:pointer}
-  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .chip{display:flex;align-items:center;gap:7px;background:var(--panel-2);border:1px solid var(--line);
-        border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;user-select:none}
-  .chip.off{opacity:.35}
-  .chip .num{color:var(--muted);font-variant-numeric:tabular-nums}
-
-  /* ---- tabla ---- */
-  table{width:100%;border-collapse:collapse;margin-top:22px;font-variant-numeric:tabular-nums}
-  th,td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);font-size:14px}
-  th:first-child,td:first-child{text-align:left}
-  th{color:var(--muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
-  tbody tr:last-child td{border-bottom:none}
-  .name{display:flex;align-items:center;gap:8px}
-
-  footer{color:var(--muted);font-size:12px;margin-top:28px;text-align:center}
-  .tip{position:absolute;pointer-events:none;background:#000d;border:1px solid var(--line);
-       border-radius:8px;padding:6px 9px;font-size:12px;white-space:nowrap;opacity:0;transition:opacity .12s}
-  @media (max-width:520px){ .card .val{font-size:20px} h1{font-size:19px} }
+  h1, h2, h3, p { margin: 0; }
+  .envoltura { width: min(1040px, calc(100% - 3rem)); margin: 0 auto; }
+  .portada { background: var(--carbon); color: var(--marfil); padding: 2.8rem 0 2.4rem; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .portada .eyebrow { color: var(--ambar); }
+  .portada h1 { margin-top: .7rem; font-size: clamp(32px, 4vw, 44px); font-weight: 700; line-height: 1.15; letter-spacing: -.02em; }
+  .portada p { margin-top: .9rem; max-width: 40rem; color: #dce1e3; }
+  section { padding: 2.4rem 0 0; }
+  h2 { font-size: 28px; font-weight: 600; line-height: 1.25; letter-spacing: -.015em; }
+  .intro { margin-top: .45rem; color: var(--piedra); max-width: 42rem; }
+  .destacados { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+  .tarjeta { background: white; border: 1px solid var(--borde); border-radius: 10px; padding: 1rem 1.1rem; }
+  .rol { color: var(--quemado); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .quien { display: flex; align-items: center; gap: .5rem; margin-top: .45rem; font-weight: 600; font-size: 18px; }
+  .cifra { margin-top: .15rem; font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+  .nota { margin-top: .25rem; color: var(--piedra); font-size: 13px; }
+  .punto { width: 10px; height: 10px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(24,39,45,.28); }
+  .sube { color: var(--error); }
+  .baja { color: var(--exito); }
+  .igual { color: var(--piedra); }
+  .tabla { margin-top: 1.2rem; overflow-x: auto; background: white; border: 1px solid var(--borde); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: right; padding: .7rem .9rem; border-bottom: 1px solid var(--borde); font-size: 14px; vertical-align: middle; white-space: nowrap; }
+  th:first-child, td:first-child, th.texto, td.texto { text-align: left; }
+  th { background: var(--arena); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--piedra); }
+  tr:last-child td { border-bottom: 0; }
+  .nombre { display: flex; align-items: center; gap: .5rem; font-weight: 600; }
+  td.pts { font-weight: 700; font-size: 16px; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.2rem; }
+  .panel { background: white; border: 1px solid var(--borde); border-radius: 10px; padding: 1rem 1rem .9rem; }
+  .panel h3 { font-size: 16px; font-weight: 600; margin-bottom: .7rem; }
+  .vacio { color: var(--piedra); font-size: 14px; }
+  .apuesta { display: flex; justify-content: space-between; gap: .8rem; align-items: baseline; padding: .55rem 0; border-top: 1px solid var(--borde); font-size: 14px; }
+  .apuesta:first-of-type { border-top: 0; }
+  .marca { flex: none; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .marca.hit { color: var(--exito); }
+  .marca.miss { color: var(--error); }
+  .marca.flat, .marca.void, .marca.pending { color: var(--piedra); }
+  .grafico { position: relative; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; font-family: "DM Sans", "Segoe UI", sans-serif; }
+  #chart { cursor: zoom-in; }
+  .grid { stroke: var(--borde); stroke-width: 1; }
+  .axis { fill: var(--piedra); font-size: 11px; }
+  .series { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+  .pt { stroke: white; stroke-width: 2; cursor: pointer; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; }
+  .ficha { display: flex; align-items: center; gap: .4rem; background: var(--arena); border: 0; border-radius: 999px; padding: .35rem .75rem; font: inherit; font-size: 14px; color: inherit; cursor: pointer; user-select: none; }
+  .ficha.off { opacity: .38; }
+  .ficha .num { color: var(--piedra); }
+  .reglas { margin-top: 1.2rem; background: white; border: 1px solid var(--borde); border-radius: 10px; padding: 1.2rem 1.3rem 1.2rem 2.2rem; }
+  .reglas li + li { margin-top: .45rem; }
+  .tip { position: absolute; pointer-events: none; background: var(--carbon); color: var(--marfil); border-radius: 8px; padding: .35rem .55rem; font-size: 13px; white-space: nowrap; opacity: 0; }
+  footer { margin-top: 3rem; padding: 1.6rem 0 2.4rem; border-top: 1px solid var(--borde); color: var(--piedra); font-size: 13px; }
+  .lupa {
+    position: fixed; inset: 0; z-index: 40; background: var(--marfil);
+    display: flex; flex-direction: column;
+    padding: max(.8rem, env(safe-area-inset-top)) max(.8rem, env(safe-area-inset-right)) max(.8rem, env(safe-area-inset-bottom)) max(.8rem, env(safe-area-inset-left));
+  }
+  .lupa[hidden] { display: none; }
+  .lupa-barra { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: .7rem; }
+  #lectura { color: var(--piedra); font-size: 14px; margin-top: .15rem; }
+  .lupa-scroll {
+    flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch;
+    background: white; border: 1px solid var(--borde); border-radius: 10px; padding: .5rem .7rem .8rem;
+  }
+  .lupa .axis { font-size: 16px; }
+  .lupa .series { stroke-width: 3.5; }
+  .lupa .pt { stroke-width: 3; }
+  #cerrarLupa { flex: none; }
+  @media (max-width: 800px) {
+    .dos { grid-template-columns: 1fr; }
+    .cifra { font-size: 24px; }
+    .lupa svg { min-width: 860px; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <header class="top">
-    <h1>Pesaje Diario</h1>
-    <span class="sub" id="subtitle">cargando…</span>
+  <header class="portada">
+    <div class="envoltura">
+      <p class="eyebrow">Colegio Mayor Peñafiel</p>
+      <h1>Pesaje semanal</h1>
+      <p>Cada semana, un peso y una apuesta. Eliges a otro colegial y dices si sube o baja respecto a su pesaje anterior. Si aciertas, sumas 3 puntos.</p>
+      <p id="resumen">Cargando…</p>
+    </div>
   </header>
 
-  <section class="movers" id="movers"></section>
+  <main class="envoltura" id="main" hidden>
+    <section>
+      <div class="destacados" id="destacados"></div>
+    </section>
 
-  <section class="panel">
-    <div class="chartbox">
-      <svg id="chart" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Peso a lo largo del tiempo"></svg>
-      <div class="tip" id="tip"></div>
+    <section>
+      <h2>Clasificación</h2>
+      <p class="intro">Los puntos salen de las apuestas y no se editan. El peso es el último en el que esa persona se pesó.</p>
+      <div class="tabla">
+        <table>
+          <thead>
+            <tr>
+              <th class="texto">Colegial</th>
+              <th>Puntos</th>
+              <th>Aciertos</th>
+              <th>Último</th>
+              <th>Cambio</th>
+              <th>Total</th>
+              <th>Pesajes</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div id="jornada"></div>
+
+    <section>
+      <h2>Evolución del peso</h2>
+      <p class="intro">Pulsa la gráfica para verla más grande. Pulsa un nombre para ocultar su línea.</p>
+      <div class="panel" style="margin-top:1.2rem">
+        <div class="grafico">
+          <svg id="chart" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Peso a lo largo de los pesajes"></svg>
+          <div class="tip" id="tip"></div>
+        </div>
+        <div class="leyenda" id="leyenda"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Cómo se juega</h2>
+      <ol class="reglas">
+        <li>El pesaje es una vez por semana. El cambio se mide contra el pesaje anterior de esa persona.</li>
+        <li>Cada colegial hace una apuesta: elige a otro y dice si sube o baja. No vale apostar por uno mismo. Una por semana.</li>
+        <li>Acierto: 3 puntos. Fallo: 0. Si el peso no cambia, o si esa persona no se pesa, la apuesta no suma.</li>
+        <li>Las apuestas se apuntan en el pesaje, junto con los kilos. La clasificación se actualiza sola al guardar.</li>
+      </ol>
+    </section>
+  </main>
+
+  <div id="lupa" class="lupa" hidden>
+    <div class="lupa-barra">
+      <div>
+        <p class="eyebrow" style="color:var(--quemado)">Gráfica</p>
+        <p id="lectura">Pulsa un punto para ver el peso. En el móvil, desliza de lado.</p>
+      </div>
+      <button type="button" id="cerrarLupa">Cerrar</button>
     </div>
-    <div class="legend" id="legend"></div>
-  </section>
+    <div class="lupa-scroll">
+      <div class="grafico">
+        <svg id="chartBig" viewBox="0 0 900 680" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Peso a lo largo de los pesajes, ampliado"></svg>
+        <div class="tip" id="tipBig"></div>
+      </div>
+    </div>
+  </div>
 
-  <table>
-    <thead>
-      <tr><th>Persona</th><th>Último</th><th>Último cambio</th><th>Desde el inicio</th><th>Registros</th></tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-
-  <footer>Actualizado a diario · <span id="lastdate"></span></footer>
-</div>
+  <footer>
+    <div class="envoltura">Colegio Mayor Peñafiel · Pesaje semanal · <span id="piefecha"></span></div>
+  </footer>
 
 <script>
-/* ------------------------------------------------------------------
-   DATOS DE EJEMPLO — solo se usan si no se puede cargar data.json
-   (por ejemplo al abrir este archivo directamente desde el disco).
-   En la web publicada manda siempre data.json.
------------------------------------------------------------------- */
+/* Porra: una apuesta {on, dir:"up"|"down"} por persona y fecha de pesaje.
+   Los puntos no se guardan: se calculan aquí. Acierto = 3. */
+const ACIERTO = 3;
 const DEMO = {
   unit: "kg",
   people: [
-    { id:"vader",  name:"Vader",  color:"#6c8cff" },
-    { id:"marta",  name:"Marta",  color:"#38d39f" },
-    { id:"leo",    name:"Leo",    color:"#ffb454" },
-    { id:"sofia",  name:"Sofía",  color:"#ff6fae" }
+    { id:"vader", name:"Vader", color:"#6c8cff" },
+    { id:"marta", name:"Marta", color:"#1e7e5a" },
+    { id:"leo", name:"Leo", color:"#c66e09" },
+    { id:"sofia", name:"Sofía", color:"#c83e37" }
   ],
   entries: {
-    "2026-08-11": { vader:88.4, marta:64.2, leo:95.0 },
-    "2026-08-12": { vader:88.1, marta:64.4, leo:94.6 },
-    "2026-08-13": { vader:88.6, marta:64.0, leo:94.1 },
-    "2026-08-14": { vader:87.9, marta:63.8, leo:94.4 },
-    "2026-08-15": { vader:87.5, marta:63.9, leo:93.7 },
-    "2026-08-16": { vader:87.7, marta:63.5, leo:93.2 },
-    "2026-08-17": { vader:87.2, marta:63.6, leo:93.5 },
     "2026-08-18": { vader:86.8, marta:63.3, leo:93.0, sofia:71.4 },
-    "2026-08-19": { vader:87.0, marta:63.1, leo:92.4, sofia:71.1 },
-    "2026-08-20": { vader:86.4, marta:63.4, leo:92.7, sofia:70.6 },
-    "2026-08-21": { vader:86.1, marta:63.0, leo:92.1, sofia:70.9 },
-    "2026-08-22": { vader:85.7, marta:62.8, leo:92.5, sofia:70.3 },
-    "2026-08-23": { vader:85.9, marta:62.9, leo:91.8, sofia:69.8 },
-    "2026-08-24": { vader:85.3, marta:62.6, leo:91.9, sofia:69.9 },
     "2026-08-25": { vader:84.9, marta:62.7, leo:91.2, sofia:69.4 }
+  },
+  bets: {
+    "2026-08-25": {
+      marta: { on:"vader", dir:"down" },
+      leo: { on:"marta", dir:"down" }
+    }
   }
 };
 
 const PAD = { l:52, r:18, t:18, b:34 };
 const W = 900, H = 420;
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 let DATA = null;
 const hidden = new Set();
 
-/* ---------- utilidades ---------- */
-const fmt = n => (Math.round(n*10)/10).toFixed(1);
-const signed = n => (n>0?"+":"") + fmt(n);
-const dLabel = iso => { const [y,m,d] = iso.split("-"); return d + "/" + m; };
+const fmt = n => (Math.round(Number(n) * 10) / 10).toFixed(1).replace(".", ",");
+const signed = n => (n > 0 ? "+" : "") + fmt(n);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const fechaLarga = iso => { const [y,m,d] = iso.split("-"); return `${+d} de ${MESES[+m - 1]} de ${y}`; };
+const fechaCorta = iso => { const [y,m,d] = iso.split("-"); return `${d}/${m}`; };
+const colorOk = c => /^#[0-9a-fA-F]{6}$/.test(c || "") ? c : "#18272d";
+const nombre = id => DATA.people.find(p => p.id === id)?.name || id;
 
-/** Pares [fecha, valor] ordenados de una persona, saltando los días sin dato. */
+function trazo(hex){
+  const h = colorOk(hex).slice(1);
+  const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  if (lum < 0.62) return "#" + h;
+  const k = 0.45;
+  const p = n => Math.round(n * k).toString(16).padStart(2,"0");
+  return "#" + p(r) + p(g) + p(b);
+}
+function sentido(v){
+  if (v > 0.001) return "sube";
+  if (v < -0.001) return "baja";
+  return "igual";
+}
+
+function prevWeight(pid, before){
+  const dates = Object.keys(DATA.entries).filter(d => d < before).sort();
+  for (let i = dates.length - 1; i >= 0; i--) {
+    const v = DATA.entries[dates[i]][pid];
+    if (typeof v === "number") return { date: dates[i], value: v };
+  }
+  return null;
+}
+
+function resolveBet(date, bet){
+  if (!bet || !bet.on || (bet.dir !== "up" && bet.dir !== "down")) return { status:"empty" };
+  const day = DATA.entries[date] || {};
+  const hayPesaje = Object.values(day).some(v => typeof v === "number");
+  const base = { on: bet.on, dir: bet.dir };
+  if (!hayPesaje) return { ...base, status:"pending", points:0 };
+  const cur = day[bet.on];
+  if (typeof cur !== "number") return { ...base, status:"void", points:0 };
+  const prev = prevWeight(bet.on, date);
+  if (!prev) return { ...base, status:"void", points:0 };
+  const delta = Math.round((cur - prev.value) * 10) / 10;
+  if (delta === 0) return { ...base, status:"flat", delta, cur, points:0 };
+  const hit = (bet.dir === "up" && delta > 0) || (bet.dir === "down" && delta < 0);
+  return { ...base, status: hit ? "hit" : "miss", delta, cur, points: hit ? ACIERTO : 0 };
+}
+
+function scoreboard(){
+  const acc = new Map();
+  DATA.people.forEach(p => acc.set(p.id, { points:0, hits:0, resolved:0 }));
+  Object.keys(DATA.bets || {}).sort().forEach(date => {
+    Object.entries(DATA.bets[date] || {}).forEach(([pid, bet]) => {
+      if (!acc.has(pid)) return;
+      const r = resolveBet(date, bet);
+      const a = acc.get(pid);
+      if (r.status === "hit") { a.points += r.points; a.hits++; a.resolved++; }
+      else if (r.status === "miss" || r.status === "flat") a.resolved++;
+    });
+  });
+  return acc;
+}
+
 function seriesOf(pid){
   return Object.keys(DATA.entries).sort()
     .filter(d => typeof DATA.entries[d][pid] === "number")
     .map(d => [d, DATA.entries[d][pid]]);
 }
 
-/* ---------- carga ---------- */
+function pesoDe(pid){
+  const s = seriesOf(pid);
+  if (!s.length) return { n:0 };
+  const latest = s[s.length - 1][1];
+  const prev = s.length > 1 ? s[s.length - 2][1] : null;
+  return {
+    n: s.length,
+    latest,
+    delta: prev === null ? null : Math.round((latest - prev) * 10) / 10,
+    total: Math.round((latest - s[0][1]) * 10) / 10,
+    start: s[0][1]
+  };
+}
+
 async function load(){
-  try{
-    const res = await fetch("data.json?t=" + Date.now(), {cache:"no-store"});
-    if(!res.ok) throw 0;
+  try {
+    const res = await fetch("data.json?t=" + Date.now(), { cache:"no-store" });
+    if (!res.ok) throw 0;
     DATA = await res.json();
-  }catch(e){
+  } catch (e) {
     DATA = DEMO;
   }
-  if(!DATA.entries || !Object.keys(DATA.entries).length){
-    document.getElementById("subtitle").textContent = "aún no hay registros";
-    return;
-  }
+  DATA.people = DATA.people || [];
+  DATA.entries = DATA.entries || {};
+  DATA.bets = DATA.bets || {};
+  DATA.unit = DATA.unit || "kg";
+  document.getElementById("main").hidden = false;
   render();
 }
 
-/* ---------- pintado ---------- */
 function render(){
-  const dates = Object.keys(DATA.entries).sort();
-  const last = dates[dates.length-1];
-  document.getElementById("subtitle").textContent =
-    DATA.people.length + (DATA.people.length===1?" persona":" personas") + " · " +
-    dates.length + (dates.length===1?" día":" días") + " · " + DATA.unit;
-  document.getElementById("lastdate").textContent = "último registro " + last;
+  const dates = Object.keys(DATA.entries).filter(d => Object.values(DATA.entries[d] || {}).some(v => typeof v === "number")).sort();
+  const last = dates[dates.length - 1];
+  document.getElementById("resumen").textContent = dates.length
+    ? `${DATA.people.length} colegiales · ${dates.length} ${dates.length === 1 ? "pesaje" : "pesajes"} · último el ${fechaLarga(last)}`
+    : "Todavía no hay pesajes.";
+  document.getElementById("piefecha").textContent = last ? `último pesaje el ${fechaLarga(last)}` : "sin pesajes";
 
-  const stats = DATA.people.map(p => {
-    const s = seriesOf(p.id);
-    if(!s.length) return { p, n:0 };
-    const latest = s[s.length-1][1];
-    const prev   = s.length>1 ? s[s.length-2][1] : null;
-    return {
-      p, n:s.length, latest,
-      latestDate: s[s.length-1][0],
-      delta: prev===null ? null : latest - prev,
-      total: latest - s[0][1],
-      start: s[0][1]
-    };
-  }).filter(x => x.n>0);
+  const board = DATA.people.map(p => ({ p, ...scoreboard().get(p.id), ...pesoDe(p.id) }))
+    .sort((a, b) => b.points - a.points || b.hits - a.hits || a.p.name.localeCompare(b.p.name, "es"));
 
-  drawMovers(stats);
+  drawDestacados(board, last);
+  drawTabla(board);
+  drawJornada(last);
   drawChart();
-  drawLegend(stats);
-  drawTable(stats);
+  drawLeyenda(board);
 }
 
-function moverCard(label, st, key, note){
-  if(!st) return `<div class="card"><div class="label">${label}</div>
-    <div class="who flat">—</div><div class="note">aún no hay datos suficientes</div></div>`;
-  const v = st[key];
-  const cls = v > 0.001 ? "up" : v < -0.001 ? "down" : "flat";
-  const arrow = v > 0.001 ? "▲" : v < -0.001 ? "▼" : "•";
-  return `<div class="card">
-    <div class="label">${label}</div>
-    <div class="who"><span class="dot" style="background:${st.p.color}"></span>${st.p.name}</div>
-    <div class="val ${cls}">${arrow} ${signed(v)} ${DATA.unit}</div>
-    <div class="note">${note(st)}</div>
-  </div>`;
+function tarjeta(rol, quien, cifra, nota, cifraClase){
+  return `<article class="tarjeta">
+    <div class="rol">${rol}</div>
+    <div class="quien">${quien}</div>
+    <div class="cifra ${cifraClase || ""}">${cifra}</div>
+    <div class="nota">${nota}</div>
+  </article>`;
 }
 
-function drawMovers(stats){
-  const withDelta = stats.filter(s => s.delta !== null);
-  const byDelta = [...withDelta].sort((a,b)=>a.delta-b.delta);
-  const byTotal = [...stats].sort((a,b)=>a.total-b.total);
+function drawDestacados(board, last){
+  const lideres = board.filter(s => s.points > 0 && s.points === board[0].points);
+  let porra;
+  if (!lideres.length) {
+    porra = tarjeta("Porra", "Sin puntos todavía", "0", "Se empiezan a sumar en el próximo pesaje.");
+  } else if (lideres.length === 1) {
+    const s = lideres[0];
+    porra = tarjeta("Va ganando la porra",
+      `<span class="punto" style="background:${trazo(s.p.color)}"></span>${esc(s.p.name)}`,
+      `${s.points}`,
+      s.points === 1 ? "punto" : "puntos");
+  } else {
+    porra = tarjeta("Empate en la porra",
+      esc(lideres.map(s => s.p.name).join(", ")),
+      `${lideres[0].points}`,
+      "puntos");
+  }
 
-  const bestDay  = byDelta[0];
-  const worstDay = byDelta[byDelta.length-1];
-  const bestAll  = byTotal[0];
-  const worstAll = byTotal[byTotal.length-1];
+  const deltas = [];
+  if (last) {
+    DATA.people.forEach(p => {
+      const cur = DATA.entries[last][p.id];
+      if (typeof cur !== "number") return;
+      const prev = prevWeight(p.id, last);
+      if (!prev) return;
+      deltas.push({ p, delta: Math.round((cur - prev.value) * 10) / 10, latest: cur });
+    });
+  }
+  const bajas = deltas.filter(d => d.delta < 0).sort((a, b) => a.delta - b.delta);
+  const subidas = deltas.filter(d => d.delta > 0).sort((a, b) => b.delta - a.delta);
+  const baja = bajas[0]
+    ? tarjeta("Mayor bajada", `<span class="punto" style="background:${trazo(bajas[0].p.color)}"></span>${esc(bajas[0].p.name)}`, `▼ ${signed(bajas[0].delta)} kg`, `ahora ${fmt(bajas[0].latest)} kg`, "baja")
+    : tarjeta("Mayor bajada", "Nadie ha bajado", "—", last ? "en el último pesaje" : "aún no hay dos pesajes");
+  const sube = subidas[0]
+    ? tarjeta("Mayor subida", `<span class="punto" style="background:${trazo(subidas[0].p.color)}"></span>${esc(subidas[0].p.name)}`, `▲ ${signed(subidas[0].delta)} kg`, `ahora ${fmt(subidas[0].latest)} kg`, "sube")
+    : tarjeta("Mayor subida", "Nadie ha subido", "—", last ? "en el último pesaje" : "aún no hay dos pesajes");
 
-  const noteDay = s => "desde el pesaje anterior · ahora " + fmt(s.latest) + " " + DATA.unit;
-  const noteAll = s => "de " + fmt(s.start) + " → " + fmt(s.latest) + " " + DATA.unit;
-
-  const dayGain = (worstDay && worstDay !== bestDay) ? worstDay : null;
-  const allGain = (worstAll && worstAll !== bestAll) ? worstAll : null;
-
-  document.getElementById("movers").innerHTML =
-      moverCard("Mayor bajada · último", bestDay, "delta", noteDay)
-    + moverCard(dayGain && dayGain.delta > 0 ? "Mayor subida · último" : "Menor bajada · último",
-                dayGain, "delta", noteDay)
-    + moverCard("Mejor en total", bestAll, "total", noteAll)
-    + moverCard(allGain && allGain.total > 0 ? "Más ha subido en total" : "Menos ha bajado en total",
-                allGain, "total", noteAll);
+  document.getElementById("destacados").innerHTML = porra + baja + sube;
 }
 
-function drawChart(){
-  const svg = document.getElementById("chart");
+function drawTabla(board){
+  const cls = v => v === null ? "igual" : sentido(v);
+  document.getElementById("tbody").innerHTML = board.map(s => `
+    <tr>
+      <td class="texto"><div class="nombre"><span class="punto" style="background:${trazo(s.p.color)}"></span>${esc(s.p.name)}</div></td>
+      <td class="pts">${s.points}</td>
+      <td>${s.resolved ? `${s.hits}/${s.resolved}` : "—"}</td>
+      <td>${s.n ? fmt(s.latest) : "—"}</td>
+      <td class="${cls(s.delta)}">${s.delta === null || s.delta === undefined ? "—" : signed(s.delta)}</td>
+      <td class="${s.n > 1 ? cls(s.total) : "igual"}">${s.n > 1 ? signed(s.total) : "—"}</td>
+      <td>${s.n || "—"}</td>
+    </tr>`).join("") || `<tr><td class="texto" colspan="7">Todavía no hay colegiales.</td></tr>`;
+}
+
+function marca(status){
+  const txt = { hit:"Acierto", miss:"Fallo", flat:"Igual", void:"No suma", pending:"Pendiente" }[status] || "";
+  return `<span class="marca ${status}">${txt}</span>`;
+}
+
+function frase(r){
+  const dijo = r.dir === "up" ? "subía" : "bajaba";
+  const cabeza = `${esc(nombre(r.bettor))} dijo que ${esc(nombre(r.on))} ${dijo}`;
+  if (r.status === "pending") return `${esc(nombre(r.bettor))} dice que ${esc(nombre(r.on))} ${dijo}.`;
+  if (r.status === "void") return `${cabeza}. No se puede resolver.`;
+  if (r.status === "flat") return `${cabeza}. Se quedó en ${fmt(r.cur)} kg.`;
+  const movio = r.delta > 0 ? `subió ${fmt(r.delta)}` : `bajó ${fmt(Math.abs(r.delta))}`;
+  const pts = r.status === "hit" ? ` +${r.points}` : "";
+  return `${cabeza}: ${movio} kg.${pts}`;
+}
+
+function filasApuestas(date){
+  const round = (DATA.bets || {})[date] || {};
+  return Object.entries(round).map(([pid, bet]) => {
+    const r = resolveBet(date, bet);
+    if (r.status === "empty") return "";
+    return `<div class="apuesta"><span>${frase({ ...r, bettor: pid })}</span>${marca(r.status)}</div>`;
+  }).filter(Boolean);
+}
+
+function drawJornada(last){
+  const el = document.getElementById("jornada");
+  const abiertas = Object.keys(DATA.bets || {}).filter(d => {
+    const day = DATA.entries[d] || {};
+    return !Object.values(day).some(v => typeof v === "number");
+  }).sort();
+  let html = "";
+
+  if (abiertas.length) {
+    const d = abiertas[abiertas.length - 1];
+    const filas = filasApuestas(d);
+    html += `<section>
+      <h2>Apuestas abiertas</h2>
+      <p class="intro">Para el pesaje del ${fechaLarga(d)}. Se resuelven cuando haya pesos.</p>
+      <div class="panel" style="margin-top:1.2rem">${filas.join("") || `<p class="vacio">No hay apuestas completas.</p>`}</div>
+    </section>`;
+  }
+
+  if (last) {
+    const cambios = DATA.people.map(p => {
+      const cur = DATA.entries[last][p.id];
+      if (typeof cur !== "number") return "";
+      const prev = prevWeight(p.id, last);
+      const delta = prev ? Math.round((cur - prev.value) * 10) / 10 : null;
+      const mov = delta === null ? "primer pesaje" : `<span class="${sentido(delta)}">${delta > 0 ? "▲" : delta < 0 ? "▼" : "•"} ${signed(delta)}</span>`;
+      return `<div class="apuesta"><span class="nombre"><span class="punto" style="background:${trazo(p.color)}"></span>${esc(p.name)}</span><span>${fmt(cur)} kg · ${mov}</span></div>`;
+    }).filter(Boolean);
+    const apuestas = filasApuestas(last);
+    html += `<section>
+      <h2>Último pesaje</h2>
+      <p class="intro">${fechaLarga(last)}</p>
+      <div class="dos">
+        <div class="panel"><h3>Pesos</h3>${cambios.join("") || `<p class="vacio">Nadie se pesó.</p>`}</div>
+        <div class="panel"><h3>Apuestas</h3>${apuestas.join("") || `<p class="vacio">En este pesaje no hubo apuestas.</p>`}</div>
+      </div>
+    </section>`;
+  }
+  el.innerHTML = html;
+}
+
+function paintChart(svg, big){
+  const height = big ? 720 : H;
+  const bottom = big ? 72 : PAD.b;
   const dates = Object.keys(DATA.entries).sort();
   const visible = DATA.people.filter(p => !hidden.has(p.id));
-
   let vals = [];
-  visible.forEach(p => seriesOf(p.id).forEach(([,v]) => vals.push(v)));
-  if(!vals.length){ svg.innerHTML = ""; return; }
+  visible.forEach(p => seriesOf(p.id).forEach(([, v]) => vals.push(v)));
+  svg.setAttribute("viewBox", `0 0 ${W} ${height}`);
+  if (!vals.length) { svg.innerHTML = ""; return; }
 
   const t0 = new Date(dates[0]).getTime();
-  const t1 = new Date(dates[dates.length-1]).getTime();
+  const t1 = new Date(dates[dates.length - 1]).getTime();
   let min = Math.min(...vals), max = Math.max(...vals);
-  const pad = Math.max((max-min)*0.12, 0.6);
-  min -= pad; max += pad;
-
-  const X = iso => t1===t0 ? (PAD.l+(W-PAD.l-PAD.r)/2)
-      : PAD.l + (new Date(iso).getTime()-t0)/(t1-t0) * (W-PAD.l-PAD.r);
-  const Y = v => PAD.t + (max-v)/(max-min) * (H-PAD.t-PAD.b);
+  const padY = Math.max((max - min) * 0.12, 0.6);
+  min -= padY; max += padY;
+  const X = iso => t1 === t0 ? (PAD.l + (W - PAD.l - PAD.r) / 2)
+    : PAD.l + (new Date(iso).getTime() - t0) / (t1 - t0) * (W - PAD.l - PAD.r);
+  const Y = v => PAD.t + (max - v) / (max - min) * (height - PAD.t - bottom);
 
   let out = "";
-
-  // rejilla y etiquetas del eje Y
-  const TICKS = 5;
-  for(let i=0;i<=TICKS;i++){
-    const v = min + (max-min)*i/TICKS, y = Y(v);
-    out += `<line class="grid" x1="${PAD.l}" y1="${y}" x2="${W-PAD.r}" y2="${y}"/>`;
-    out += `<text class="axis" x="${PAD.l-10}" y="${y+4}" text-anchor="end">${fmt(v)}</text>`;
+  for (let i = 0; i <= 5; i++) {
+    const v = min + (max - min) * i / 5, y = Y(v);
+    out += `<line class="grid" x1="${PAD.l}" y1="${y}" x2="${W - PAD.r}" y2="${y}"/>`;
+    out += `<text class="axis" x="${PAD.l - 10}" y="${y + 4}" text-anchor="end">${fmt(v)}</text>`;
   }
-  // etiquetas del eje X (máx. ~7)
-  const step = Math.max(1, Math.ceil(dates.length/7));
-  dates.forEach((d,i)=>{
-    if(i % step && i !== dates.length-1) return;
-    out += `<text class="axis" x="${X(d)}" y="${H-PAD.b+20}" text-anchor="middle">${dLabel(d)}</text>`;
+  const step = Math.max(1, Math.ceil(dates.length / 7));
+  dates.forEach((d, i) => {
+    if (i % step && i !== dates.length - 1) return;
+    out += `<text class="axis" x="${X(d)}" y="${height - (big ? 28 : 14)}" text-anchor="middle">${fechaCorta(d)}</text>`;
   });
-
-  // series
-  visible.forEach(p=>{
+  visible.forEach(p => {
     const s = seriesOf(p.id);
-    if(!s.length) return;
-    const dAttr = s.map(([d,v],i)=> (i?"L":"M") + X(d).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
-    out += `<path class="series" d="${dAttr}" stroke="${p.color}"/>`;
-    s.forEach(([d,v])=>{
-      out += `<circle class="pt" cx="${X(d).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${s.length>40?2.5:4}"
-        fill="${p.color}" data-tip="${p.name} · ${dLabel(d)} · ${fmt(v)} ${DATA.unit}"/>`;
+    if (!s.length) return;
+    const stroke = trazo(p.color);
+    const dAttr = s.map(([d, v], i) => (i ? "L" : "M") + X(d).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
+    out += `<path class="series" d="${dAttr}" stroke="${stroke}"/>`;
+    const radio = big ? 8 : (s.length > 40 ? 2.5 : 4);
+    s.forEach(([d, v]) => {
+      out += `<circle class="pt" cx="${X(d).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${radio}" fill="${stroke}" data-tip="${esc(p.name)} · ${fechaCorta(d)} · ${fmt(v)} kg"/>`;
     });
   });
-
   svg.innerHTML = out;
-  wireTooltip(svg);
-}
-
-function wireTooltip(svg){
-  const tip = document.getElementById("tip");
-  svg.querySelectorAll(".pt").forEach(c=>{
-    c.addEventListener("mouseenter", e=>{
+  const tip = document.getElementById(big ? "tipBig" : "tip");
+  svg.querySelectorAll(".pt").forEach(c => {
+    const show = () => {
       const box = svg.getBoundingClientRect();
       const r = c.getBoundingClientRect();
       tip.textContent = c.dataset.tip;
       tip.style.opacity = 1;
-      tip.style.left = (r.left - box.left + r.width/2 - tip.offsetWidth/2) + "px";
-      tip.style.top  = (r.top  - box.top  - tip.offsetHeight - 8) + "px";
-    });
-    c.addEventListener("mouseleave", ()=> tip.style.opacity = 0);
+      tip.style.left = (r.left - box.left + r.width / 2 - tip.offsetWidth / 2) + "px";
+      tip.style.top = (r.top - box.top - tip.offsetHeight - 8) + "px";
+      if (big) document.getElementById("lectura").textContent = c.dataset.tip;
+    };
+    c.addEventListener("mouseenter", show);
+    c.addEventListener("mouseleave", () => { if (!big) tip.style.opacity = 0; });
+    c.addEventListener("click", ev => { if (big) ev.stopPropagation(); show(); });
   });
 }
 
-function drawLegend(stats){
-  const el = document.getElementById("legend");
-  el.innerHTML = DATA.people.map(p=>{
-    const st = stats.find(s=>s.p.id===p.id);
-    return `<div class="chip ${hidden.has(p.id)?"off":""}" data-id="${p.id}">
-      <span class="dot" style="background:${p.color}"></span>${p.name}
-      <span class="num">${st?fmt(st.latest):"—"}</span></div>`;
+function drawChart(){
+  paintChart(document.getElementById("chart"), false);
+  if (!document.getElementById("lupa").hidden) paintChart(document.getElementById("chartBig"), true);
+}
+
+function openLupa(){
+  const lupa = document.getElementById("lupa");
+  lupa.hidden = false;
+  document.body.style.overflow = "hidden";
+  document.getElementById("lectura").textContent = "Pulsa un punto para ver el peso. En el móvil, desliza de lado.";
+  paintChart(document.getElementById("chartBig"), true);
+}
+function closeLupa(){
+  document.getElementById("lupa").hidden = true;
+  document.body.style.overflow = "";
+}
+
+function drawLeyenda(board){
+  const el = document.getElementById("leyenda");
+  el.innerHTML = DATA.people.map(p => {
+    const st = board.find(s => s.p.id === p.id);
+    return `<button type="button" class="ficha ${hidden.has(p.id) ? "off" : ""}" data-id="${esc(p.id)}">
+      <span class="punto" style="background:${trazo(p.color)}"></span>${esc(p.name)}
+      <span class="num">${st && st.n ? fmt(st.latest) : "—"}</span></button>`;
   }).join("");
-  el.querySelectorAll(".chip").forEach(chip=>{
-    chip.onclick = ()=>{
-      const id = chip.dataset.id;
+  el.querySelectorAll(".ficha").forEach(ficha => {
+    ficha.onclick = () => {
+      const id = ficha.dataset.id;
       hidden.has(id) ? hidden.delete(id) : hidden.add(id);
       render();
     };
   });
 }
 
-function drawTable(stats){
-  const cls = v => v > 0.001 ? "up" : v < -0.001 ? "down" : "flat";
-  document.getElementById("tbody").innerHTML =
-    [...stats].sort((a,b)=>a.total-b.total).map(s=>`
-      <tr>
-        <td><div class="name"><span class="dot" style="background:${s.p.color}"></span>${s.p.name}</div></td>
-        <td>${fmt(s.latest)}</td>
-        <td class="${s.delta===null?"flat":cls(s.delta)}">${s.delta===null?"—":signed(s.delta)}</td>
-        <td class="${cls(s.total)}">${signed(s.total)}</td>
-        <td>${s.n}</td>
-      </tr>`).join("");
-}
+document.getElementById("chart").addEventListener("click", openLupa);
+document.getElementById("cerrarLupa").addEventListener("click", closeLupa);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLupa(); });
 
 load();
 </script>
