@@ -300,9 +300,19 @@ function pesoDe(pid){
   };
 }
 
+function dataUrl(){
+  const host = location.hostname;
+  if (host.endsWith("github.io")) {
+    const owner = host.split(".")[0];
+    const repo = location.pathname.split("/").filter(Boolean)[0] || (owner + ".github.io");
+    return `https://raw.githubusercontent.com/${owner}/${repo}/main/data.json?t=${Date.now()}`;
+  }
+  return `data.json?t=${Date.now()}`;
+}
+
 async function load(){
   try {
-    const res = await fetch("data.json?t=" + Date.now(), { cache:"no-store" });
+    const res = await fetch(dataUrl(), { cache:"no-store" });
     if (!res.ok) throw 0;
     DATA = await res.json();
   } catch (e) {

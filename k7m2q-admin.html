@@ -219,8 +219,26 @@ const cfg = () => ({
   token: $("token").value.trim()
 });
 
-const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+function b64(s){
+  const bytes = new TextEncoder().encode(s);
+  let bin = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(bin);
+}
 const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, "")), c => c.charCodeAt(0)));
+
+function dataUrl(){
+  const host = location.hostname;
+  if (host.endsWith("github.io")) {
+    const owner = host.split(".")[0];
+    const repo = location.pathname.split("/").filter(Boolean)[0] || (owner + ".github.io");
+    return `https://raw.githubusercontent.com/${owner}/${repo}/main/data.json?t=${Date.now()}`;
+  }
+  return `data.json?t=${Date.now()}`;
+}
 
 function normalize(){
   DATA.people = DATA.people || [];
@@ -228,7 +246,26 @@ function normalize(){
   DATA.bets = DATA.bets || {};
   DATA.unit = DATA.unit || "kg";
 }
+function scrubOrphans(){
+  const ids = new Set(DATA.people.map(p => p.id));
+  Object.keys(DATA.entries).forEach(d => {
+    const day = DATA.entries[d];
+    if (!day) return;
+    Object.keys(day).forEach(pid => { if (!ids.has(pid)) delete day[pid]; });
+    if (!Object.keys(day).length) delete DATA.entries[d];
+  });
+  Object.keys(DATA.bets || {}).forEach(d => {
+    const round = DATA.bets[d];
+    if (!round) return;
+    Object.keys(round).forEach(pid => {
+      if (!ids.has(pid)) { delete round[pid]; return; }
+      if (round[pid] && !ids.has(round[pid].on)) delete round[pid];
+    });
+    if (!Object.keys(round).length) delete DATA.bets[d];
+  });
+}
 function payload(){
+  scrubOrphans();
   return { unit: DATA.unit || "kg", bets: DATA.bets || {}, people: DATA.people, entries: DATA.entries };
 }
 
@@ -318,11 +355,12 @@ function ready(text){
 async function loadLocal(){
   msg("cfgmsg", "info", "Cargando datos…");
   try {
-    const res = await fetch("data.json?t=" + Date.now(), { cache:"no-store" });
+    const res = await fetch(dataUrl(), { cache:"no-store" });
     if (!res.ok) throw new Error("No se encuentra data.json");
     DATA = await res.json();
     normalize();
-    ready(LOCAL ? "Copia local cargada. Guardar aquí no publica en GitHub." : "Datos publicados cargados. Para guardarlos hace falta el token.");
+    scrubOrphans();
+    ready(LOCAL ? "Copia local cargada. Guardar aquí no publica en GitHub." : "Datos cargados. Con el token, Guardar publica la lista tal como está ahora.");
   } catch (e) {
     msg("cfgmsg", "err", e.message);
   }
@@ -340,17 +378,29 @@ async function gh(path, opts = {}){
   return res.json();
 }
 
+async function refreshSha(){
+  const c = cfg();
+  const j = await gh(`/repos/${c.owner}/${c.repo}/contents/data.json?ref=${encodeURIComponent(c.branch)}`);
+  SHA = j.sha;
+  return j;
+}
+
 $("connect").onclick = async () => {
   const c = cfg();
   if (!c.owner || !c.repo || !c.token) return msg("cfgmsg", "err", "Rellena usuario, repositorio y token.");
   saveCfg();
-  msg("cfgmsg", "info", "Cargando data.json desde GitHub…");
+  const keep = !!DATA;
+  msg("cfgmsg", "info", keep ? "Conectando sin pisar la lista actual…" : "Cargando data.json desde GitHub…");
   try {
-    const j = await gh(`/repos/${c.owner}/${c.repo}/contents/data.json?ref=${encodeURIComponent(c.branch)}`);
-    SHA = j.sha;
-    DATA = JSON.parse(unb64(j.content));
-    normalize();
-    ready("Conectado a GitHub. Guardar publica este archivo.");
+    const j = await refreshSha();
+    if (!keep) {
+      DATA = JSON.parse(unb64(j.content));
+      normalize();
+      scrubOrphans();
+    }
+    ready(keep
+      ? `Conectado. Se mantiene tu lista (${DATA.people.length} colegiales). Guardar publica esos borrados.`
+      : "Conectado a GitHub. Guardar publica este archivo.");
   } catch (e) {
     msg("cfgmsg", "err", "Error: " + e.message);
   }
@@ -395,20 +445,11 @@ function quitarPersona(id){
     if (draft.bets[pid] && draft.bets[pid].on === id) delete draft.bets[pid];
   });
   DATA.people = DATA.people.filter(x => x.id !== id);
-  Object.keys(DATA.entries).forEach(d => { if (DATA.entries[d]) delete DATA.entries[d][id]; });
-  Object.keys(DATA.bets || {}).forEach(d => {
-    const round = DATA.bets[d];
-    if (!round) return;
-    delete round[id];
-    Object.keys(round).forEach(pid => {
-      if (round[pid] && round[pid].on === id) delete round[pid];
-    });
-    if (!Object.keys(round).length) delete DATA.bets[d];
-  });
+  scrubOrphans();
   renderPeople(draft);
   renderBets(draft);
   renderPreview();
-  msg("savemsg", "info", p.name + " fuera de la lista. Guarda para publicarlo. Si recargas sin guardar, vuelve a aparecer.");
+  msg("savemsg", "info", p.name + " fuera de la lista (" + DATA.people.length + " quedan). Pulsa Guardar en GitHub para publicarlo.");
 }
 
 function renderBets(draft){
@@ -534,27 +575,43 @@ $("savelocal").onclick = async () => {
   }
 };
 
+async function putData(message){
+  const body = {
+    message,
+    content: b64(JSON.stringify(payload(), null, 2) + "\n"),
+    sha: SHA,
+    branch: cfg().branch
+  };
+  try {
+    return await gh(`/repos/${cfg().owner}/${cfg().repo}/contents/data.json`, {
+      method: "PUT",
+      body: JSON.stringify(body)
+    });
+  } catch (e) {
+    if (!String(e.message).startsWith("409")) throw e;
+    await refreshSha();
+    body.sha = SHA;
+    return await gh(`/repos/${cfg().owner}/${cfg().repo}/contents/data.json`, {
+      method: "PUT",
+      body: JSON.stringify(body)
+    });
+  }
+}
+
 $("save").onclick = async () => {
   const c = cfg();
-  if (!c.owner || !c.repo || !c.token || !SHA) {
-    return msg("savemsg", "err", "Conecta con GitHub antes de publicar. El guardado local no sube el archivo.");
+  if (!c.owner || !c.repo || !c.token) {
+    return msg("savemsg", "err", "Falta el token. Rellena la conexión arriba.");
   }
   const r = commitDraft();
   if (r.error) return msg("savemsg", "err", r.error);
   $("save").disabled = true;
   msg("savemsg", "info", "Publicando…");
   try {
-    const res = await gh(`/repos/${c.owner}/${c.repo}/contents/data.json`, {
-      method: "PUT",
-      body: JSON.stringify({
-        message: `pesaje ${r.date} (${r.n} pesos, ${r.b} apuestas)`,
-        content: b64(JSON.stringify(payload(), null, 2) + "\n"),
-        sha: SHA,
-        branch: c.branch
-      })
-    });
+    if (!SHA) await refreshSha();
+    const res = await putData(`pesaje ${r.date} (${DATA.people.length} colegiales, ${r.n} pesos, ${r.b} apuestas)`);
     SHA = res.content.sha;
-    msg("savemsg", "ok", `Publicados ${r.n} pesos y ${r.b} apuestas del ${r.date}. En la web se ven en torno a un minuto.`);
+    msg("savemsg", "ok", `Publicado: ${DATA.people.length} colegiales · ${r.n} pesos · ${r.b} apuestas del ${r.date}.`);
     renderAll(false);
   } catch (e) {
     msg("savemsg", "err", "Error al publicar: " + e.message);

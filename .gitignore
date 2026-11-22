@@ -1,0 +1,6 @@
+.env
+.env.*
+*.token
+token.txt
+token.local
+secrets/
